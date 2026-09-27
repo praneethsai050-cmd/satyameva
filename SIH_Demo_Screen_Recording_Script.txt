@@ -1,0 +1,196 @@
+# Satyameva Aegis — 5 to 6 Minute Video Demo Script
+### Smart India Hackathon (SIH 2025/2026) | Problem Statement: SIH26125
+**Team CYPHER-X (Team ID: 10)**  
+*Theme: Blockchain & Cybersecurity | Category: Software*
+
+---
+
+## 🎬 Recording Setup & Checklist (Before You Hit Record)
+
+1. **System Status**: Ensure the Satyameva server is running (`python run.py` or double-click the **Satyameva Aegis** desktop icon).
+2. **Demo Logins**:
+   - **Student**: `praneethsai050` | Password: `student123`
+   - **Issuer (Registrar)**: `issuer` | Password: `issuer123`
+   - **Super Admin**: `admin` | Password: `Satyameva@2026`
+   - **Public Verification**: `http://127.0.0.1:5000/verify` (No login needed)
+3. **Open Tabs / Windows Ready**:
+   - Window 1: **PowerPoint / PDF Slide Deck** (`SIH_2026_Satyameva_Idea_Template.pptx` or `.pdf` open on Slide 1).
+   - Window 2: **Satyameva Desktop Application** (or Chrome browser at `http://127.0.0.1:5000/login`).
+   - Window 3: An incognito / private browser window ready for the public verification test.
+4. **Resolution**: 1920×1080 (16:9), full screen. Speak with a clear, steady, confident voice.
+
+---
+
+## ⏱️ Timeline Overview (Total: ~5:30 Min)
+
+| Timestamp | Segment Title | Slide / Prototype View |
+| :--- | :--- | :--- |
+| **0:00 – 0:50** | **1. Introduction & The National Crisis** | Slide 1 (Cover/Workflow) & Slide 2 (USP) |
+| **0:50 – 1:45** | **2. Launching Desktop Mode & Tech Stack** | Desktop Icon ➔ Frameless App Window ➔ Slide 3 |
+| **1:45 – 2:50** | **3. Issuer Portal: Gemini AI & Batch Issuance** | Login as Issuer ➔ AI Auto-Extraction ➔ PoW Mining |
+| **2:50 – 3:55** | **4. Student Portal: 3D Ledger & Radar QR** | Login as Student ➔ 3D Card Flip ➔ Stamped PDF |
+| **3:55 – 4:55** | **5. Instant Public Verification & Tamper Check** | `/verify` Public Check ➔ 6 Verdicts ➔ Anti-Tamper |
+| **4:55 – 5:35** | **6. Admin Center, National Scale & Wrap-Up** | Admin Dashboard ➔ Slide 4/5 Roadmap ➔ Closing |
+
+---
+
+## 📜 Full Script: Scene-by-Scene
+
+---
+
+### Segment 1: Introduction & The National Crisis (0:00 – 0:50)
+
+**🖥️ Screen Action**:
+- Show **Slide 1** of your presentation deck (`SIH_2026_Satyameva_Idea_Template.pptx`), showing:
+  - *Problem Statement ID: SIH26125*
+  - *Title: Blockchain-Based Secure Platform for Identity, Access Control, and Digital Asset Management*
+  - *Team: CYPHER-X (Team ID: 10)*
+  - Transition briefly to **Slide 2** (*"What is Satyameva?"*).
+
+**🎙️ Voiceover (Speak confidently)**:
+> *"Hello respected evaluators and jury members! We are **Team CYPHER-X**, presenting **Satyameva Aegis** for Problem Statement **SIH26125** — Blockchain-Based Secure Platform for Identity, Access Control, and Digital Asset Management.*
+>
+> *Every year in India, over 40,000 fake degrees and forged academic documents are officially detected. Employers spend 2 to 4 weeks and thousands of rupees per candidate on slow, manual background verification, while students risk losing physical certificates.*
+>
+> *We built **Satyameva Aegis** to solve this crisis permanently. It transforms university credentials into tamper-proof, cryptographically anchored digital assets that students own self-sovereignly, and that employers can verify in under **three seconds** using a permanent, institutional-branded QR code. Let's see the live system in action!"*
+
+---
+
+### Segment 2: Native Desktop Launcher & Architecture (0:50 – 1:45)
+
+**🖥️ Screen Action**:
+- Switch screen to your Windows Desktop.
+- Hover over and double-click the **Satyameva Aegis** desktop icon (with the custom 3D Cyber Shield).
+- Show the app launching silently in frameless desktop application mode (clean, no browser address bars or tabs).
+- Show the login landing page with the **3D WebGL rotating Blockchain hero** visualization.
+- Briefly switch to **Slide 3** of the deck (*Technical Approach*).
+
+**🎙️ Voiceover**:
+> *"Here on our Windows desktop, Satyameva Aegis launches with a single click via our silent native runner — opening in a dedicated, frameless desktop application window.*
+>
+> *On the login interface, you see our live WebGL 3D Blockchain hero, visualizing our underlying proof-of-work cryptographic ledger.*
+>
+> *As shown on Slide 3 of our technical approach, our architecture is built with:*
+> - *A **Python 3.14 + Flask 3.0** backend with strict Role-Based Access Control,*
+> - *A custom **Proof-of-Work blockchain engine** with SHA-256 and difficulty 4, dual-persisted for zero loss,*
+> - *Cryptographic **PBKDF2-HMAC-SHA256** salting with 100,000 iterations,*
+> - *And **Google Gemini 2.0 Flash AI** for intelligent document data extraction.*
+>
+> *The platform operates a live multi-campus network across the Jaypee Group of Institutions: JIIT Noida, JUIT Waknaghat, and JUET Guna. Now let's sign in to the Issuer portal."*
+
+---
+
+### Segment 3: Issuer Portal, Gemini AI & Blockchain Mining (1:45 – 2:50)
+
+**🖥️ Screen Action**:
+- In the app, enter:
+  - **Username**: `issuer`
+  - **Password**: `issuer123`
+  - Click **Sign In**.
+- You arrive at the **Issuer Dashboard**.
+- Click **Issue Single Credential** or **AI Extract**.
+- Show the **Gemini AI Extraction** button: upload a sample marksheet/certificate image or PDF.
+- Show Gemini AI automatically parsing student name, roll number, course, and grade into the form fields.
+- Click **Anchor Credential to Blockchain**.
+- Show the confirmation alert: Block mined, cryptographic hash generated, and automated notification dispatched via Gmail SMTP (`hackathonsage@gmail.com`).
+- Briefly navigate to **Bulk Issue**: show the CSV upload interface and explain the *all-or-nothing atomic batch validator*.
+
+**🎙️ Voiceover**:
+> *"We are now logged in as the Registrar on the Issuer Portal. Registrars can issue single credentials or perform mass batch issuances.*
+>
+> *Instead of tedious manual data entry, the registrar simply uploads a certificate PDF. Our integrated **Google Gemini 2.0 Flash AI** automatically reads the document, extracts the student's name, roll number, degree title, and issue date, and populates the fields in seconds.*
+>
+> *When we hit **Anchor Credential to Blockchain**, three things happen synchronously:*
+> 1. *A per-document cryptographic salt is generated, producing an immutable PBKDF2 digest.*
+> 2. *Our Proof-of-Work engine mines a new block into the cryptographic chain.*
+> 3. *A real-time notification email is automatically dispatched to the student via our verified Gmail SMTP gateway.*
+>
+> *For registrar offices processing thousands of students, our Bulk Issue pipeline supports CSV uploads with an **all-or-nothing atomic validator** — if even one row is invalid, zero documents are written and zero orphaned blocks are created."*
+
+---
+
+### Segment 4: Student Portal, 3D Ledger & Radar QR (2:50 – 3:55)
+
+**🖥️ Screen Action**:
+- Click **Sign Out** from Issuer.
+- Sign in as Student:
+  - **Username**: `praneethsai050`
+  - **Password**: `student123`
+  - Click **Sign In**.
+- Lands on the **Student Dashboard**:
+  - Show the credential cards with hover 3D tilt effects.
+- Click on the **Degree / Marksheet** credential to open the detail view:
+  - Show the cryptographic verification seal stamped on the credential.
+  - Click **Show Ledger Data** to flip the card in 3D and show the underlying block index, timestamp, and proof-of-work hash.
+  - Highlight the **Permanent Institutional QR Code** with the **JIIT Noida crest** in the center and the futuristic **360° rotating radar HUD scan ring**.
+  - Click **Download Stamped PDF** and quickly open the downloaded PDF showing the official seal and QR code.
+
+**🎙️ Voiceover**:
+> *"Now let's see the student's perspective. We log in as Praneeth Sai.*
+>
+> *On the Student Dashboard, the student has a self-sovereign digital wallet with lifetime access to all their earned credentials.*
+>
+> *Opening our JIIT Marksheet, we see our cryptographic verification seal pressed onto the certificate. Clicking **Show Ledger Data** flips the card in 3D, revealing the exact block index, parent hash, and cryptographic proof anchored onto the chain.*
+>
+> *Here is our signature feature: the **Permanent Institutional QR Code**. It features the official JIIT campus crest embedded inside using Error Correction Level H. It is surrounded by our cyber radar HUD scan ring. This QR code never expires — it is a lifetime digital anchor.*
+>
+> *The student can also download an official verification-grade Stamped PDF with the embedded institutional crest, ready for job applications."*
+
+---
+
+### Segment 5: Instant Public Verification & Tamper Detection (3:55 – 4:55)
+
+**🖥️ Screen Action**:
+- Copy the credential's cryptographic hash from the detail page (or use the permanent link `/v/<hash>`).
+- Open your **Incognito / Private Window**.
+- Navigate to: `http://127.0.0.1:5000/verify` (No login required).
+- Paste the hash into the verification box and click **Verify Credential**.
+- Show the instant result card:
+  - Green banner: **VERIFIED & AUTHENTIC**
+  - Displays: Student Name, Roll Number, Issuing Campus (JIIT Noida), Block #, Timestamp, Verification Verdict: `VALID`.
+- Highlight the verification speed (<2 seconds).
+- Next, deliberately type or alter one character of the hash (or type a fake hash like `deadbeef1234`) and click **Verify**.
+- Show the immediate red failure verdict: **NOT_FOUND / TAMPERED**.
+
+**🎙️ Voiceover**:
+> *"Now, imagine an employer at Infosys or Google receives this application. They don't need to sign up or phone the university registrar. They simply scan the QR code or open `/verify`.*
+>
+> *Pasting the credential hash, we get an authenticated verdict in **less than two seconds**: status VALID, student name confirmed, issuing institution JIIT Noida, with full block provenance.*
+>
+> *Crucially, our system does not simply trust the stored database record. On every verification request, it **re-derives the cryptographic hash from scratch** from the stored payload and walks the entire blockchain. If any database administrator maliciously alters a grade or student name, our engine immediately flags it as **TAMPERED**, giving employers 100% cryptographic certainty."*
+
+---
+
+### Segment 6: Admin Control Center, National Roadmap & Conclusion (4:55 – 5:35)
+
+**🖥️ Screen Action**:
+- Switch back to the main window. Log out and sign in as **Super Admin**:
+  - **Username**: `admin`
+  - **Password**: `Satyameva@2026`
+- Show the **Admin Dashboard**:
+  - Total users, multi-campus institution table (JIIT, JUIT, JUET), document audit trail, and the **live Blockchain Explorer**.
+- Switch to **Slide 4 & 5** of your presentation deck:
+  - Briefly highlight the **Phase Rollout Roadmap** (Jaypee Pilot ➔ State Network ➔ UGC/DigiLocker ➔ 40M+ National Scale).
+- Switch to camera / closing slide:
+  - Slide 1 / Slide 6 closing banner.
+
+**🎙️ Voiceover**:
+> *"Finally, we log in as the Master Administrator. From this unified control center, authorities oversee all registered campuses, monitor issued credentials, audit access logs, and inspect the real-time block explorer.*
+>
+> *As detailed on Slide 4 and 5 of our presentation deck:*
+> - *Our system operates at **zero gas fees** in-house, with Polygon network scaling costing just ₹0.08 per credential.*
+> - *Our rollout roadmap scales from our current Jaypee multi-campus deployment to state university networks, and integrates directly with **DigiLocker and NAD** via REST APIs to serve over 40 million Indian students.*
+> - *It aligns directly with the National Education Policy 2020 and Digital India.*
+>
+> *Satyameva Aegis is not a concept — it is a fully tested, production-ready platform that passed all 11 automated E2E integration suites.*
+>
+> *Thank you, jury members! We are Team CYPHER-X, ready to answer your questions!"*
+
+---
+
+## 🎯 Pro Tips for a Winning Video
+
+1. **Pacing**: Don't rush. Speak at a measured, calm tempo. 5 minutes and 20 seconds is the sweet spot.
+2. **Cursor Movement**: Move your mouse smoothly. Hover over buttons for 1 second before clicking so the jury's eyes can follow.
+3. **No Terminal Windows Needed**: Since Satyameva runs seamlessly in desktop app mode, you don't need to show any ugly black command prompt windows during your recording.
+4. **Volume**: Do a 15-second mic sound-check first to ensure your voice is crisp and audible over any background noise.

@@ -1,0 +1,41 @@
+=======================================================
+RIDEHACK'26 — IIC JUIT STARTUP APPLICATION ANSWERS
+=======================================================
+
+TEAM / STARTUP NAME:
+CYPHER-X / Satyameva Aegis
+
+-------------------------------------------------------
+6. Do you have an innovation/startup idea?
+-------------------------------------------------------
+Select:
+[X] We have a project/prototype that could be developed further
+(Alternative if only single idea option allowed: [X] Yes, we have a clear idea)
+
+-------------------------------------------------------
+7. Title of your idea:
+-------------------------------------------------------
+Satyameva Aegis — Blockchain-Based Credential Verification & Digital Trust Platform
+
+-------------------------------------------------------
+8. What problem are you trying to solve? (100 WORDS)
+-------------------------------------------------------
+Every year in India, over 40,000 counterfeit degrees and forged academic documents are officially detected, while thousands more go unnoticed, severely damaging institutional credibility. Employers and corporate background verification agencies face agonizing turnaround delays of 2 to 4 weeks and spend between Rs 500 to Rs 2,000 per applicant on tedious manual registrar verifications. Meanwhile, students remain at constant risk of losing physical certificates with zero self-sovereign digital ownership. Traditional paper credentials and static PDFs offer no cryptographic tamper resistance, while existing institutional verification portals are siloed, slow, and unauthenticated.
+
+-------------------------------------------------------
+9. Briefly describe your proposed solution (150 WORDS)
+-------------------------------------------------------
+Satyameva Aegis is a decentralized trust protocol that transforms academic certificates into cryptographically anchored, self-sovereign digital assets verified in under 2 seconds. The platform integrates a custom Proof-of-Work blockchain ledger (SHA-256) with PBKDF2-HMAC-SHA256 dynamic salting, re-deriving cryptographic digests from scratch on every verification request to guarantee zero silent passes for altered records. University registrars eliminate manual data entry through Google Gemini 2.0 Flash AI, which auto-extracts certificate fields for single and bulk CSV issuances with all-or-nothing atomic validation. Students receive a permanent self-sovereign digital wallet with 3D interactive ledger inspection and stamped PDF downloads. Employers verify credentials without accounts using campus-branded QR codes embedded with institutional crests (such as JUIT Waknaghat and JIIT Noida) with Error Correction Level H. Our zero-gas architecture and corporate pay-per-verify API slash verification costs by over 99%, establishing a unified national digital trust ecosystem.
+
+-------------------------------------------------------
+10. Domain/Area of innovation:
+-------------------------------------------------------
+Select:
+[X] Cybersecurity
+(If multiple selections allowed, also check: FinTech, Education / EdTech, Software / IT, Artificial Intelligence / Machine Learning)
+
+-------------------------------------------------------
+11. Current stage of the idea:
+-------------------------------------------------------
+Select:
+[X] Working prototype available

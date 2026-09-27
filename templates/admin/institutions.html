@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Admin · Institutions{% endblock %}
+
+{% block content %}
+<div class="stack" style="gap:1.5rem">
+
+  <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h1 style="margin:0;font-size:1.6rem">🏢 Institution Management</h1>
+      <p class="faint small" style="margin:.25rem 0 0">{{ pagination.total }} registered</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+
+  <form method="get" class="row" style="gap:.75rem">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Search name / code…" style="max-width:280px">
+    <button class="btn btn-primary btn-sm" type="submit">Search</button>
+    {% if q %}<a href="{{ url_for('admin.institutions') }}" class="btn btn-ghost btn-sm">Clear</a>{% endif %}
+  </form>
+
+  <div class="card" style="overflow-x:auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Code</th><th>Name</th><th>Domain</th>
+          <th>Issuers</th><th>Status</th><th>Created</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inst in pagination.items %}
+        <tr>
+          <td><code>{{ inst.short_code }}</code></td>
+          <td><b>{{ inst.name }}</b></td>
+          <td class="faint small">{{ inst.domain or '—' }}</td>
+          <td class="faint small">{{ inst.issuer_count }}</td>
+          <td>
+            <span class="badge badge-{{ inst.status_class }}" style="font-size:.78rem">
+              {{ inst.status_label }}
+            </span>
+          </td>
+          <td class="faint small">{{ inst.created_at|date }}</td>
+          <td>
+            {% if not inst.is_approved %}
+            <form method="post" action="{{ url_for('admin.approve_institution', inst_id=inst.id) }}" style="display:inline">
+              <button class="btn btn-primary btn-sm" type="submit">✅ Approve</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('admin.revoke_institution', inst_id=inst.id) }}" style="display:inline">
+              <button class="btn btn-ghost btn-sm" type="submit"
+                      onclick="return confirm('Revoke approval for {{ inst.name }}?')">
+                🚫 Revoke
+              </button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="faint" style="text-align:center;padding:2rem">No institutions found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pagination.pages > 1 %}
+  <div class="row" style="gap:.5rem;justify-content:center">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.institutions', page=pagination.prev_num, q=q) }}" class="btn btn-ghost btn-sm">← Prev</a>
+    {% endif %}
+    <span class="faint small" style="align-self:center">{{ pagination.page }} / {{ pagination.pages }}</span>
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.institutions', page=pagination.next_num, q=q) }}" class="btn btn-ghost btn-sm">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Issue Document{% endblock %}
+
+{% block content %}
+<div class="stack stack-8">
+  <div class="row row-between">
+    <div class="stack">
+      <span class="hero-kicker">Issuer Portal</span>
+      <h1>Issue a New Document</h1>
+    </div>
+    <a href="{{ url_for('issuer.dashboard') }}" class="btn btn-ghost">← Back to Dashboard</a>
+  </div>
+
+  <section class="panel" style="max-width: 640px;">
+
+    {# ── AI Extraction Banner ── #}
+    <div id="ai-banner" class="card" style="background:linear-gradient(135deg,rgba(47,107,237,.15),rgba(47,107,237,.05));border:1px solid rgba(47,107,237,.35);margin-bottom:1.5rem;padding:1rem 1.25rem">
+      <div class="row" style="align-items:center;gap:.75rem;flex-wrap:wrap">
+        <span style="font-size:1.4rem">✨</span>
+        <div style="flex:1;min-width:160px">
+          <b style="font-size:.95rem">Auto-fill with Gemini AI</b>
+          <p class="small faint" style="margin:.15rem 0 0">Upload the document below, then click to let Gemini read and pre-fill the fields for you.</p>
+        </div>
+        <button type="button" id="ai-extract-btn" class="btn btn-primary btn-sm" onclick="runAIExtract()">
+          ✨ Extract Fields
+        </button>
+      </div>
+      <div id="ai-status" style="display:none;margin-top:.75rem;font-size:.85rem" class="faint"></div>
+    </div>
+
+    <form method="post" action="{{ url_for('issuer.issue') }}" enctype="multipart/form-data" class="stack stack-4" novalidate>
+
+      <!-- Student Details -->
+      <div class="stack stack-3">
+        <h3>Student Details</h3>
+
+        <div>
+          <label class="field-label" for="roll_number">Roll Number *</label>
+          <input class="input" id="roll_number" name="roll_number" type="text" required placeholder="e.g. 22103045" value="{{ form.get('roll_number', '') }}">
+          {% if errors.get('roll_number') %}
+            <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['roll_number'] }}</div>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="field-label" for="student_name">Student Name (Optional)</label>
+          <input class="input" id="student_name" name="student_name" type="text" placeholder="For verification purposes" value="{{ form.get('student_name', '') }}">
+        </div>
+
+        <div>
+          <label class="field-label" for="student_email">Student Email Address (Recommended for Real-Time Alerts)</label>
+          <input class="input" id="student_email" name="student_email" type="email" placeholder="e.g. student@gmail.com" value="{{ form.get('student_email', '') }}">
+          <span class="tiny faint" style="display:block; margin-top:0.25rem">Instant issuance notifications and verification alerts from hackathonsage@gmail.com will be sent to this email.</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Document Details -->
+      <div class="stack stack-3">
+        <h3>Document Details</h3>
+
+        <div>
+          <label class="field-label" for="doc_type">Document Type *</label>
+          <select class="input" id="doc_type" name="doc_type" required>
+            <option value="" disabled {% if not form.get('doc_type') %}selected{% endif %}>-- Select Document Type --</option>
+            {% for key, meta in doc_types.items() %}
+              <option value="{{ key }}" {% if form.get('doc_type') == key %}selected{% endif %}>{{ meta[1] }} {{ meta[0] }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.get('doc_type') %}
+            <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['doc_type'] }}</div>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="field-label" for="title">Title / Name of Document *</label>
+          <input class="input" id="title" name="title" type="text" required placeholder="e.g. Bachelor of Technology in Computer Science" value="{{ form.get('title', '') }}">
+          {% if errors.get('title') %}
+            <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['title'] }}</div>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="field-label" for="validity_days">Validity in Days (Optional)</label>
+          <input class="input" id="validity_days" name="validity_days" type="number" placeholder="Leave blank if it never expires" value="{{ form.get('validity_days', '') }}">
+          {% if errors.get('validity_days') %}
+            <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['validity_days'] }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- File Upload -->
+      <div class="stack stack-3">
+        <h3>Source Document <span style="color:var(--red,#e53935);font-size:.85em">(Required)</span></h3>
+        <p class="small muted" style="margin:0">
+          A document file is required to issue a credential.
+          It will be securely hashed, anchored to the blockchain, and stored.
+          Accepted formats: PDF, PNG, JPG, JPEG, WEBP. Max 16 MB.
+        </p>
+
+        <div>
+          <input type="file" id="document" name="document" class="input" required accept=".png,.jpg,.jpeg,.pdf,.webp">
+          {% if errors.get('document') %}
+            <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['document'] }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1rem">
+        <span aria-hidden="true">🔒</span> Issue and Anchor to Blockchain
+      </button>
+
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// DOC_TYPE mapping for auto-select after AI extraction
+const DOC_TYPE_KEYS = {{ doc_types.keys()|list|tojson }};
+
+async function runAIExtract() {
+  const fileInput = document.getElementById('document');
+  const btn = document.getElementById('ai-extract-btn');
+  const status = document.getElementById('ai-status');
+
+  if (!fileInput.files.length) {
+    status.style.display = 'block';
+    status.textContent = '⚠️ Please select a document file first, then click Extract.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Extracting…';
+  status.style.display = 'block';
+  status.textContent = 'Sending to Gemini AI…';
+
+  const formData = new FormData();
+  formData.append('document', fileInput.files[0]);
+
+  try {
+    const resp = await fetch('{{ url_for("issuer.extract_fields") }}', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      status.textContent = '⚠️ ' + data.error;
+      return;
+    }
+
+    // Pre-fill form fields
+    let filled = [];
+    if (data.roll_number) {
+      document.getElementById('roll_number').value = data.roll_number;
+      filled.push('roll number');
+    }
+    if (data.student_name) {
+      document.getElementById('student_name').value = data.student_name;
+      filled.push('student name');
+    }
+    if (data.student_email) {
+      document.getElementById('student_email').value = data.student_email;
+      filled.push('student email');
+    }
+    if (data.title) {
+      document.getElementById('title').value = data.title;
+      filled.push('title');
+    }
+    if (data.doc_type && DOC_TYPE_KEYS.includes(data.doc_type)) {
+      document.getElementById('doc_type').value = data.doc_type;
+      filled.push('document type');
+    }
+
+    if (filled.length) {
+      status.textContent = '✅ Filled: ' + filled.join(', ') + '. Please review and submit.';
+    } else {
+      status.textContent = '⚠️ Gemini could not extract fields from this document. Fill manually.';
+    }
+  } catch (err) {
+    status.textContent = '❌ Extraction failed: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Extract Fields';
+  }
+}
+</script>
+{% endblock %}

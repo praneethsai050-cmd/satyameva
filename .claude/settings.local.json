@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"C:/Users/hp/OneDrive/Desktop/\" 2>/dev/null | head -40)",
+      "Read(//c/Users/hp/OneDrive/Desktop/**)",
+      "Read(//c/Users/hp/**)",
+      "Bash(python -c ' *)",
+      "Bash(python seed.py --reset)",
+      "Bash(python _smoke.py)",
+      "Bash(grep -v '^$')",
+      "Bash(python -)",
+      "Bash(PYTHONIOENCODING=utf-8 python _assert.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 python _smoke.py)"
+    ]
+  }
+}

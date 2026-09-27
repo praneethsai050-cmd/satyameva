@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Offline · Satyameva{% endblock %}
+
+{% block content %}
+<div class="stack stack-8" style="max-width:38rem; margin-inline:auto; text-align:center; padding-top:2rem">
+  
+  <div class="panel card3d" data-tilt="4" data-tilt-lift="10">
+    <div style="font-size:3.5rem; margin-bottom:.5rem" aria-hidden="true">📡</div>
+    <h2>You Are Currently Offline</h2>
+    <p class="muted" style="margin:.75rem 0 1.5rem">
+      Satyameva is running in offline PWA mode. Previously cached certificates, verification results,
+      and application assets remain accessible on this device.
+    </p>
+
+    <div class="stack stack-3" style="text-align:left; background:var(--surface); padding:1rem; border-radius:var(--r-sm); margin-bottom:1.5rem">
+      <div class="row" style="gap:.5rem; align-items:center">
+        <span class="badge badge-valid">✓ PWA Active</span>
+        <span class="small">Offline Shell Loaded</span>
+      </div>
+      <p class="tiny faint" style="margin:0">
+        Live blockchain consensus sync and real-time remote lookups will automatically resume once your internet connection is restored.
+      </p>
+    </div>
+
+    <button class="btn btn-primary" type="button" onclick="window.location.reload()">
+      <span aria-hidden="true">🔄</span> Reconnect &amp; Retry
+    </button>
+  </div>
+
+</div>
+{% endblock %}

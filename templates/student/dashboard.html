@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stack stack-8">
+
+  <!-- ══ Hero: welcome + live 3D chain ═══════════════════════════════════ -->
+  <section class="hero scene">
+    <canvas class="hero-canvas" data-hero3d aria-hidden="true"></canvas>
+
+    <div class="hero-body">
+      <span class="hero-kicker">🎓 Student Portal</span>
+      <h1>Welcome back, <em>{{ student.full_name.split()[0] }}</em></h1>
+      <p class="hero-lead">
+        {{ student.program }}{% if student.batch %} · {{ student.batch }}{% endif %} ·
+        Roll {{ student.roll_number }}<br>
+        {{ student.institution }}
+      </p>
+
+      <div class="row">
+        <span class="chain-status {{ '' if chain_ok else 'is-broken' }}">
+          <span aria-hidden="true">{{ '🔗' if chain_ok else '⛓️‍💥' }}</span>
+          {% if chain_ok %}
+            Ledger intact · <span class="mono">{{ chain_blocks }} blocks</span>
+          {% else %}
+            {{ chain_message }}
+          {% endif %}
+        </span>
+        <button class="btn btn-ghost btn-sm" type="button"
+                data-chain-check="{{ url_for('student.chain_validate') }}">
+          Re-verify chain
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-aside">
+      <!-- CSS-3D chain, hidden by CSS once the WebGL canvas reports ready. -->
+      <div class="chain-fallback" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p class="chain-caption tiny faint center">
+        Every credential below is anchored to this chain
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ Stats ═══════════════════════════════════════════════════════════ -->
+  <section aria-label="Credential summary">
+    <div class="grid grid-stats scene" data-stagger>
+      {% for key, label, icon, foot in [
+        ('total',         'Documents',    '📁', 'issued to you'),
+        ('valid',         'Valid',        '✅', 'ready to share'),
+        ('expiring',      'Expiring Soon','⏳', 'within 30 days'),
+        ('expired',       'Expired',      '⛔', 'need renewal'),
+        ('verifications', 'Verifications','🔍', 'by employers'),
+      ] %}
+        <div class="stat card3d stat-{{ key }}" data-tilt="6" data-tilt-lift="10">
+          <span class="stat-glow" aria-hidden="true"></span>
+          <span class="card3d-glare" aria-hidden="true"></span>
+          {# depth-* lifts these off the card face while it tilts. #}
+          <div class="stat-head depth-1">
+            <span class="stat-label">{{ label }}</span>
+            <span class="stat-icon" aria-hidden="true">{{ icon }}</span>
+          </div>
+          <div class="stat-value depth-2" data-count="{{ stats[key] }}">{{ stats[key] }}</div>
+          <div class="stat-foot">{{ foot }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if stats.revoked %}
+      <p class="small" style="margin:.9rem 0 0">
+        <span class="badge badge-revoked">🚫 {{ stats.revoked }} revoked</span>
+        <span class="faint" style="margin-left:.5rem">
+          A revoked credential fails verification. See
+          <a href="{{ url_for('student.notifications') }}">alerts</a>.
+        </span>
+      </p>
+    {% endif %}
+  </section>
+
+  <!-- ══ Filters ═════════════════════════════════════════════════════════ -->
+  <section class="panel panel-tight">
+    <form class="filters" method="get" action="{{ url_for('student.dashboard') }}"
+          data-filter-form role="search">
+      <label class="field">
+        <span class="field-icon" aria-hidden="true">🔎</span>
+        <span class="sr-only">Search credentials</span>
+        <input class="input input-search" type="search" name="q" value="{{ search }}"
+               placeholder="Search title, issuer or hash…">
+      </label>
+
+      <label class="field">
+        <span class="sr-only">Filter by type</span>
+        <select class="select" name="type">
+          <option value="">All types</option>
+          {% for code, meta in doc_types.items() %}
+            <option value="{{ code }}" {{ 'selected' if active_type == code }}>
+              {{ meta[1] }} {{ meta[0] }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="sr-only">Filter by status</span>
+        <select class="select" name="status">
+          <option value="">Any status</option>
+          {% for code, label in [('VALID','Valid'), ('EXPIRING','Expiring soon'),
+                                 ('EXPIRED','Expired'), ('REVOKED','Revoked')] %}
+            <option value="{{ code }}" {{ 'selected' if active_status == code }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <noscript><button class="btn btn-primary btn-sm" type="submit">Apply</button></noscript>
+
+      {% if search or active_type or active_status %}
+        <a class="btn btn-ghost btn-sm push" href="{{ url_for('student.dashboard') }}">
+          Clear filters
+        </a>
+      {% endif %}
+    </form>
+  </section>
+
+  <!-- ══ Documents ═══════════════════════════════════════════════════════ -->
+  <section aria-label="My documents">
+    <div class="row row-between" style="margin-bottom:1.1rem">
+      <h2>My Documents</h2>
+      <span class="small faint">
+        {{ documents|length }} of {{ stats.total }} shown
+      </span>
+    </div>
+
+    {% if documents %}
+      <div class="grid grid-docs scene" data-stagger>
+        {% for doc in documents %}
+          <article class="doc card3d s-{{ doc.status_class }}"
+                   data-tilt="7" data-tilt-lift="16">
+            <span class="card3d-glare" aria-hidden="true"></span>
+
+            {# depth-* only lifts *direct* children of .card3d — preserve-3d
+               does not survive an intermediate flat wrapper. #}
+            <div class="row depth-2" style="align-items:flex-start; gap:.85rem">
+              <span class="doc-type-icon" aria-hidden="true">{{ doc.type_icon }}</span>
+              <div style="flex:1; min-width:0">
+                <div class="tiny upper faint">{{ doc.type_label }}</div>
+                <h3 class="doc-title">
+                  <a href="{{ url_for('student.document_detail', doc_id=doc.id) }}">
+                    {{ doc.title }}
+                  </a>
+                </h3>
+              </div>
+            </div>
+
+            <div class="row row-between depth-1">
+              <span class="badge badge-{{ doc.status_class }}">{{ doc.status_label }}</span>
+              {% if doc.is_stamped %}
+                <span class="badge badge-neutral" title="Digitally stamped copy generated">
+                  🔖 Stamped
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="row depth-2" style="align-items:center; gap:1rem; margin:.5rem 0">
+              {% if doc.card_qr %}
+                <div style="background:#fff; padding:4px; border-radius:6px; flex:none; box-shadow:var(--sh-1)" title="Scan to verify (Contains hash & student details)">
+                  <img src="{{ doc.card_qr }}" alt="Verification QR Code" width="68" height="68" style="display:block; border-radius:3px">
+                </div>
+              {% endif %}
+              <div class="doc-meta" style="flex:1; margin:0">
+                <span class="doc-meta-row">
+                  <span aria-hidden="true">🏛️</span> <b>{{ doc.issuer_name or '—' }}</b>
+                </span>
+                <span class="doc-meta-row">
+                  <span aria-hidden="true">📅</span>
+                  Issued {{ doc.issued_on|date }}
+                  {% if doc.valid_until %}
+                    · valid until {{ doc.valid_until|date }}
+                  {% else %}
+                    · no expiry
+                  {% endif %}
+                </span>
+                {% if doc.verification_count %}
+                  <span class="doc-meta-row">
+                    <span aria-hidden="true">🔍</span>
+                    Verified {{ doc.verification_count }}×
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+
+            {# Validity bar. Width is animated in from 0 by app.js. #}
+            {% if doc.valid_until %}
+              <div class="stack stack-2">
+                <div class="life" data-life="{{ doc.lifetime_percent }}"
+                     role="img"
+                     aria-label="{{ doc.lifetime_percent }}% of validity period remaining">
+                  <i></i>
+                </div>
+                <span class="tiny faint">
+                  {% set left = doc.days_left %}
+                  {% if doc.revoked %}Revoked by issuer
+                  {% elif left is not none and left < 0 %}Expired {{ -left }} days ago
+                  {% elif left is not none %}{{ left }} days of validity left
+                  {% endif %}
+                </span>
+              </div>
+            {% endif %}
+
+            <div class="row row-between" style="align-items:center; gap:.5rem">
+              <span class="doc-hash mono">{{ doc.doc_hash|short_hash }}</span>
+              <button class="btn btn-icon btn-ghost btn-sm" type="button" data-copy="{{ doc.doc_hash }}" title="Copy full hash" aria-label="Copy hash">⧉</button>
+            </div>
+
+            <div class="doc-actions depth-2">
+              <a class="btn btn-primary btn-sm"
+                 href="{{ url_for('student.document_detail', doc_id=doc.id) }}">View Details</a>
+              <a class="btn btn-ghost btn-sm"
+                 href="{{ url_for('student.download_stamped', doc_id=doc.id) }}">
+                 <span aria-hidden="true">⬇️</span> Download
+              </a>
+              <a class="btn btn-ghost btn-sm push"
+                 href="{{ url_for('student.document_detail', doc_id=doc.id) }}#share"
+                 title="Share a verification QR code">Share QR</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="panel empty">
+        <div class="empty-art" aria-hidden="true">📭</div>
+        {% if search or active_type or active_status %}
+          <h3>No credentials match those filters</h3>
+          <p class="muted">Try widening the search or clearing the filters.</p>
+          <a class="btn btn-primary" href="{{ url_for('student.dashboard') }}">Clear filters</a>
+        {% else %}
+          <h3>No credentials yet</h3>
+          <p class="muted">
+            Once your institution issues a document it appears here, anchored to
+            the blockchain and ready to share.
+          </p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

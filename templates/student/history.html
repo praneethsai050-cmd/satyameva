@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}
+  {% if doc %}History · {{ doc.title }}{% else %}Verification History{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="stack stack-6">
+
+  <!-- ══ Heading ═════════════════════════════════════════════════════════ -->
+  <div class="stack stack-3">
+    {% if doc %}
+      <a class="small faint" href="{{ url_for('student.document_detail', doc_id=doc.id) }}">
+        ← Back to {{ doc.type_label|lower }}
+      </a>
+    {% else %}
+      <a class="small faint" href="{{ url_for('student.dashboard') }}">← Back to dashboard</a>
+    {% endif %}
+
+    <div>
+      <span class="hero-kicker">📜 Audit trail</span>
+      <h1 style="margin-top:.6rem">
+        {% if doc %}Who checked this {{ doc.type_label|lower }}
+        {% else %}Verification history{% endif %}
+      </h1>
+      <p class="muted" style="margin-top:.4rem; max-width:62ch">
+        Every verification attempt is recorded with its timestamp, network
+        address and outcome — including the failures. Nobody can check your
+        credential without leaving a trace here.
+      </p>
+    </div>
+  </div>
+
+  {% if doc %}
+    <div class="panel panel-tight row row-between">
+      <div class="row">
+        <span class="doc-type-icon" aria-hidden="true">{{ doc.type_icon }}</span>
+        <div>
+          <b>{{ doc.title }}</b>
+          <div class="tiny faint mono">{{ doc.doc_hash|short_hash }}</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="badge badge-{{ doc.status_class }}">{{ doc.status_label }}</span>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('student.all_history') }}">
+          All credentials →
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- ══ Summary counts ══════════════════════════════════════════════════ -->
+  {% set successes = logs | selectattr('result', 'equalto', 'VALID') | list | length %}
+  {% set failures = logs | length - successes %}
+  {% if logs %}
+    <div class="grid grid-stats scene" data-stagger>
+      {% for label, value, icon, tint in [
+        ('Total checks', logs|length, '🔍', 'verified'),
+        ('Successful',   successes,   '✅', 'valid'),
+        ('Flagged',      failures,    '⚠️', 'expiring'),
+      ] %}
+        <div class="stat card3d stat-{{ tint }}" data-tilt="6" data-tilt-lift="10">
+          <span class="stat-glow" aria-hidden="true"></span>
+          <span class="card3d-glare" aria-hidden="true"></span>
+          <div class="stat-head depth-1">
+            <span class="stat-label">{{ label }}</span>
+            <span class="stat-icon" aria-hidden="true">{{ icon }}</span>
+          </div>
+          <div class="stat-value depth-2" data-count="{{ value }}">{{ value }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- ══ Timeline ════════════════════════════════════════════════════════ -->
+  {% if logs %}
+    <section class="panel">
+      <div class="panel-title">🕓 Chronological trail · newest first</div>
+
+      <div class="timeline">
+        {% for log in logs %}
+          <article class="tl-item">
+            <span class="tl-dot tl-{{ log.result_class }}" aria-hidden="true"></span>
+
+            <div class="row row-between" style="gap:.75rem; align-items:flex-start">
+              <div style="min-width:0">
+                <div class="row" style="gap:.5rem">
+                  <span aria-hidden="true">{{ log.result_icon }}</span>
+                  <b>{{ log.who }}</b>
+                  <span class="badge badge-{{ log.result_class }}" style="font-size:.65rem">
+                    {{ log.result.replace('_', ' ') }}
+                  </span>
+                </div>
+
+                {% if not doc and log.doc %}
+                  <div class="small muted" style="margin-top:.3rem">
+                    <span aria-hidden="true">{{ log.doc.type_icon }}</span>
+                    <a href="{{ url_for('student.document_detail', doc_id=log.doc.id) }}">
+                      {{ log.doc.title }}
+                    </a>
+                  </div>
+                {% endif %}
+
+                {% if log.result == 'NOT_FOUND' %}
+                  <div class="small" style="margin-top:.3rem; color:var(--red-lit)">
+                    A hash that is not on the ledger was submitted — a forged or
+                    mistyped credential.
+                  </div>
+                {% elif log.result == 'QR_EXPIRED' %}
+                  <div class="small" style="margin-top:.3rem; color:var(--slate-lit)">
+                    An expired QR code was scanned. Replay blocked.
+                  </div>
+                {% endif %}
+              </div>
+
+              <span class="tl-time nowrap">{{ log.timestamp|ago }}</span>
+            </div>
+
+            <hr class="divider" style="margin:.7rem 0">
+
+            <div class="row tiny faint" style="gap:1.25rem">
+              <span title="Exact time">🕐 {{ log.timestamp|datetime }} UTC</span>
+              <span title="How it was verified">
+                {{ '📷 QR scan' if log.method == 'QR' else '⌨️ Hash lookup' }}
+              </span>
+              {% if log.ipv4 and log.ipv4 != 'N/A' %}
+                <span class="mono" title="IPv4 address">🌐 {{ log.ipv4 }}</span>
+              {% endif %}
+              {% if log.ipv6 and log.ipv6 != 'N/A' %}
+                <span class="mono" title="IPv6 address">🌐 {{ log.ipv6 }}</span>
+              {% endif %}
+              {% if log.queried_hash %}
+                <span class="mono" title="Hash submitted by the verifier">
+                  # {{ log.queried_hash|short_hash }}
+                </span>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <p class="tiny faint center" style="margin:0">
+      {{ logs|length }} record{{ '' if logs|length == 1 else 's' }} ·
+      IP addresses are captured for both IPv4 and IPv6 where available
+    </p>
+  {% else %}
+    <div class="panel empty">
+      <div class="empty-art" aria-hidden="true">🔍</div>
+      <h3>No verifications yet</h3>
+      <p class="muted" style="max-width:46ch; margin-inline:auto">
+        {% if doc %}
+          Nobody has checked this credential. Share its QR code from the
+          document page and every scan will be logged here.
+        {% else %}
+          When an employer or university verifies one of your credentials, the
+          check appears here — with who, when and from where.
+        {% endif %}
+      </p>
+      {% if doc %}
+        <a class="btn btn-primary" href="{{ url_for('student.document_detail', doc_id=doc.id) }}#share">
+          Share this credential
+        </a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('student.dashboard') }}">
+          Go to my documents
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

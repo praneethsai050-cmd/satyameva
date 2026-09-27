@@ -1,0 +1,15 @@
+# Satyameva — Student Portal
+# Blockchain-Backed Academic Credential Verification System
+#
+# Install with:  pip install -r requirements.txt
+
+Flask>=3.0,<4.0
+Flask-SQLAlchemy>=3.1,<4.0
+Flask-Login>=0.6.3
+Flask-Mail>=0.9.1
+qrcode>=7.4
+Pillow>=10.3
+google-genai>=2.3.0
+Authlib>=1.3
+requests>=2.31
+python-dotenv>=1.0

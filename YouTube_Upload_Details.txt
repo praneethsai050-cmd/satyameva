@@ -1,0 +1,132 @@
+# YouTube Upload Metadata: Satyameva Aegis (SIH 2026)
+
+---
+
+## 📌 1. Video Title
+*(62 characters — well within YouTube's 100-character limit)*
+
+```
+Satyameva Aegis — SIH 2026 Demo | Team CYPHER-X (PS: SIH26125)
+```
+
+---
+
+## 📌 2. Category & Settings
+
+- **Category**: `Science & Technology`
+- **Audience**: `No, it's not made for kids`
+- **Visibility**: `Public`
+- **Video Link**: `https://youtu.be/Uu-bOJTZrFY`
+
+---
+
+## 📌 3. Video Chapters / Problems Timestamps
+*(Sorted directly from your recorded video timeline for YouTube's scrubber bar)*
+
+```
+0:00 Problem Statement & Introduction (SIH26125)
+0:43 Desktop App Mode & WebGL 3D Blockchain Hero
+1:28 Student Dashboard & Real-Time Gmail Alerts
+1:57 Permanent QR Code & Stamped PDF Certificate
+2:53 Issuer Portal & Gemini AI Auto-Extraction
+4:08 Admin Control Center & Multi-Campus Management
+5:04 Public Verifier & Instant On-Chain Verification
+5:31 Production Readiness & Closing
+```
+
+---
+
+## 📌 4. Full YouTube Description
+*(Copy and paste the entire block below into the YouTube Description box)*
+
+```
+Satyameva Aegis — Blockchain-Based Academic Credential Verification & Digital Asset Management Platform
+Submission for Smart India Hackathon (SIH 2026) | Ministry of Education's Innovation Cell (MIC)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 HACKATHON DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Problem Statement ID: SIH26125
+• Problem Statement Title: Blockchain-Based Secure Platform for Identity, Access Control, and Digital Asset Management
+• Theme: Blockchain & Cybersecurity
+• Category: Software
+• Team Name: CYPHER-X
+• Team ID: 10
+• Team Leader: A Praneeth Sai (CSE-CS)
+• Team Members: Jai Chauhan (CSE-CS), Jyoti Rana (CSE), Gauri (Biotech), Sparsh (CSE), Akshit Thakur (CSE-AI&DS)
+• Institution: Jaypee Group of Institutions (JIIT Noida, JUIT Waknaghat, JUET Guna)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏱️ VIDEO CHAPTERS / TIMELINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0:00 Problem Statement & Introduction (SIH26125)
+0:43 Desktop App Mode & WebGL 3D Blockchain Hero
+1:28 Student Dashboard & Real-Time Gmail Alerts
+1:57 Permanent QR Code & Stamped PDF Certificate
+2:53 Issuer Portal & Gemini AI Auto-Extraction
+4:08 Admin Control Center & Multi-Campus Management
+5:04 Public Verifier & Instant On-Chain Verification
+5:31 Production Readiness & Closing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 EXECUTIVE OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+In India, over 40,000 fake degrees and forged academic documents are detected every year. Manual background checks take 2 to 4 weeks and cost thousands of rupees per applicant. 
+
+Satyameva Aegis solves this national crisis permanently by transforming physical university certificates into self-sovereign, tamper-proof blockchain assets. Employers and background-check agencies can verify credentials in under 2 seconds using a cryptographically anchored, permanent institutional QR code.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ KEY FEATURES DEMONSTRATED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Google Gemini 2.0 Flash AI Extraction:
+   Registrars simply upload a marksheet/certificate image or PDF. Gemini AI automatically extracts student name, roll number, course, and exam details, reducing issuance time from minutes to seconds.
+
+2. Proof-of-Work Blockchain Ledger:
+   Every credential is cryptographically hashed using PBKDF2-HMAC-SHA256 with 100,000 iterations and a per-document random salt, then mined into an immutable ledger dual-persisted for 100% data integrity.
+
+3. Permanent Institutional QR Code:
+   Features official Jaypee campus crests (JIIT, JUIT, JUET) with Error Correction Level H (~30%) and a revolving cyber radar HUD animation. QR codes are lifetime-valid and never expire.
+
+4. Self-Sovereign Student Portal:
+   Students own a digital wallet of all issued credentials, with 3D interactive card-flip ledger inspectors and one-click Stamped PDF certificate downloads.
+
+5. Instant Public Verification (Under 2 Seconds):
+   Employers verify credentials on `/verify` without needing accounts. The system re-derives the cryptographic hash from scratch, ensuring zero silent passes for altered database records (immediate TAMPERED verdict).
+
+6. Automated Gmail SMTP Notifications:
+   Real-time email alerts sent to students on credential issuance and verification checks from hackathonsage@gmail.com.
+
+7. Unified Super Admin Control Center:
+   Multi-campus onboarding, role-based access control, document audit logs, and live blockchain block explorer.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🛠️ TECHNOLOGY STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Backend: Python 3.14, Flask 3.0, Flask-SQLAlchemy, Flask-Login
+• Blockchain Engine: Custom Proof-of-Work (SHA-256, Difficulty 4, dual-persisted)
+• Cryptography: PBKDF2-HMAC-SHA256, Per-Document Random Salting, AES-256
+• Artificial Intelligence: Google Gemini 2.0 Flash Multimodal API
+• Frontend: HTML5, CSS3 3D Transforms, Three.js WebGL, Vanilla JavaScript
+• Email Service: Flask-Mail with live Gmail SMTP Gateway
+• QR Engine: qrcode + Pillow (Error Correction Level H + Vector Crests)
+• Desktop App: Native silent VBS launcher in standalone application mode
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 TESTING & INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 11/11 End-to-End Automated Integration Test Suites Passed (100%)
+• 4-Tier Bulk CSV Atomic Issuance Validation Passed
+• Full Route Smoke Tests Passed (HTTP 200 OK across all portals)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#SIH2026 #SmartIndiaHackathon #Blockchain #Cybersecurity #DigitalIndia #NEP2020 #Web3 #GeminiAI #IdentityManagement #Satyameva #CypherX
+```
+
+---
+
+## 📌 5. Search Tags
+*(Copy and paste into YouTube Studio's "Tags" box)*
+
+```
+SIH 2026, Smart India Hackathon 2026, SIH26125, Satyameva, Satyameva Aegis, Team CYPHER-X, Blockchain Credential Verification, Identity Access Control, Digital Asset Management, Gemini AI, Google Gemini 2.0 Flash, Proof of Work, Python Flask, JIIT Noida, Fake Degree Prevention, Student Digital Wallet, Permanent QR Code, Cybersecurity, Web3 Education
+```

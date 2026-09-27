@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Bulk Issue Credentials{% endblock %}
+
+{% block content %}
+<div class="stack stack-8">
+  <div class="row row-between">
+    <div class="stack">
+      <span class="hero-kicker">🏛️ Issuer Portal</span>
+      <h1>Bulk Issue Credentials</h1>
+      <p class="muted">Upload a CSV file to issue and blockchain-anchor multiple credentials in a single batch.</p>
+    </div>
+    <a href="{{ url_for('issuer.dashboard') }}" class="btn btn-ghost">← Back to Dashboard</a>
+  </div>
+
+  {% if errors %}
+    <div class="alert alert-danger" role="alert">
+      <span class="alert-icon" aria-hidden="true">🚫</span>
+      <div style="flex:1">
+        <div class="alert-title">Batch Validation Failed ({{ errors|length }} error{{ 's' if errors|length > 1 else '' }})</div>
+        <div class="alert-body" style="margin-top:0.5rem">
+          <p style="margin:0 0 0.5rem">No credentials were issued. Please fix the following issues in your CSV and re-upload:</p>
+          <ul style="margin:0; padding-left:1.2rem; max-height:220px; overflow-y:auto">
+            {% for err in errors %}
+              <li><b>{{ err }}</b></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="grid" style="grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 1.5rem; align-items: start;" id="bulk-issue-grid">
+    
+    <!-- Left Column: Upload Form -->
+    <section class="panel stack stack-4">
+      <div class="panel-title">📤 Upload CSV Batch</div>
+      
+      <form method="post" action="{{ url_for('issuer.bulk_issue') }}" enctype="multipart/form-data" class="stack stack-4" novalidate>
+        <div class="stack stack-2">
+          <label class="field-label" for="csv_file">Select CSV File <span style="color:var(--red,#e53935)">*</span></label>
+          <input type="file" id="csv_file" name="csv_file" class="input" required accept=".csv" style="padding:0.75rem">
+          <span class="tiny faint">Only <code>.csv</code> files encoded in UTF-8 are supported.</span>
+        </div>
+
+        <div class="row row-between panel-tight" style="background:var(--wash,#f6f7fd); border-radius:8px; border:1px solid var(--border,#dde2f0)">
+          <div class="stack" style="gap:0.2rem">
+            <b class="small">Need a starting template?</b>
+            <span class="tiny muted">Download the formatted sample CSV with required columns.</span>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('issuer.sample_csv') }}" download="template.csv">
+            <span aria-hidden="true">📥</span> Download Sample CSV
+          </a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="margin-top:0.5rem">
+          <span aria-hidden="true">⚡</span> Validate &amp; Issue Batch
+        </button>
+      </form>
+    </section>
+
+    <!-- Right Column: Format Guidelines & Column Reference -->
+    <aside class="stack stack-4">
+      <section class="panel stack stack-3">
+        <div class="panel-title">📋 CSV Format Specification</div>
+        
+        <p class="small muted" style="margin:0">
+          The CSV must include the following column headers in the first non-empty row:
+        </p>
+
+        <div class="table-wrap">
+          <table class="table" style="font-size:0.82rem; width:100%">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>roll_number</code></td>
+                <td><span class="badge badge-error" style="font-size:0.68rem">Required</span></td>
+                <td>Unique Student ID (e.g., <code>22103045</code>)</td>
+              </tr>
+              <tr>
+                <td><code>doc_type</code></td>
+                <td><span class="badge badge-error" style="font-size:0.68rem">Required</span></td>
+                <td>Credential type code (e.g., <code>DEGREE</code>)</td>
+              </tr>
+              <tr>
+                <td><code>title</code></td>
+                <td><span class="badge badge-error" style="font-size:0.68rem">Required</span></td>
+                <td>Document title (e.g., <code>B.Tech CSE</code>)</td>
+              </tr>
+              <tr>
+                <td><code>student_name</code></td>
+                <td><span class="badge badge-neutral" style="font-size:0.68rem">Optional</span></td>
+                <td>Full name if student is not registered</td>
+              </tr>
+              <tr>
+                <td><code>validity_days</code></td>
+                <td><span class="badge badge-neutral" style="font-size:0.68rem">Optional</span></td>
+                <td>Days valid (blank = default)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="stack stack-2" style="margin-top:0.5rem">
+          <div class="tiny upper faint">Supported Document Types</div>
+          <div class="row" style="gap:0.35rem; flex-wrap:wrap">
+            {% for code, meta in doc_types.items() %}
+              <span class="badge badge-neutral" style="font-size:0.75rem" title="{{ meta[0] }}">
+                {{ meta[1] }} <code>{{ code }}</code>
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="padding:0.65rem 0.85rem; font-size:0.78rem; margin:0">
+          <span>ℹ️ <b>All-or-Nothing Rule:</b> If any row fails validation, 0 credentials are created and 0 blocks are mined.</span>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+  @media (max-width: 960px) {
+    #bulk-issue-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+{% endblock %}

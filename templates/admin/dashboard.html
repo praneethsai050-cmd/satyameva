@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="stack" style="gap:2rem">
+
+  {# ── Header ── #}
+  <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h1 style="margin:0;font-size:1.8rem">⚙️ Admin Dashboard</h1>
+      <p class="faint small" style="margin:.25rem 0 0">System-wide oversight · {{ utcnow()|datetime }}</p>
+    </div>
+    <div class="row" style="gap:.75rem">
+      <a href="{{ url_for('admin.institutions') }}" class="btn btn-primary btn-sm">Institutions</a>
+      <a href="{{ url_for('admin.users') }}" class="btn btn-ghost btn-sm">Manage Users</a>
+      <a href="{{ url_for('admin.documents') }}" class="btn btn-ghost btn-sm">All Documents</a>
+    </div>
+  </div>
+
+  {# ── Stats grid ── #}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem">
+    {% set cards = [
+      ('👥', stats.users, 'Total Users', ''),
+      ('🎓', stats.students, 'Students', 'badge-valid'),
+      ('🏛️', stats.issuers, 'Issuers', ''),
+      ('🔍', stats.verifiers, 'Verifiers', ''),
+      ('🏢', stats.institutions, 'Institutions', ''),
+      ('⏳', stats.pending_institutions, 'Pending Approval', 'badge-expiring' if stats.pending_institutions else ''),
+      ('📄', stats.documents, 'Credentials Issued', ''),
+      ('🚫', stats.revoked, 'Revoked', 'badge-revoked' if stats.revoked else ''),
+      ('✅', stats.verifications, 'Verifications Run', 'badge-valid'),
+    ] %}
+    {% for icon, value, label, cls in cards %}
+    <div class="card" style="text-align:center;padding:1.25rem 1rem">
+      <div style="font-size:1.75rem">{{ icon }}</div>
+      <div style="font-size:2rem;font-weight:800;line-height:1.1;margin:.25rem 0">
+        {% if cls %}<span class="badge {{ cls }}" style="font-size:1.6rem;padding:.2rem .5rem">{{ value }}</span>
+        {% else %}{{ value }}{% endif %}
+      </div>
+      <div class="faint small">{{ label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;flex-wrap:wrap">
+
+    {# ── Pending Institutions ── #}
+    <div class="card stack" style="gap:1rem">
+      <h3 style="margin:0">⏳ Pending Institution Approvals</h3>
+      {% if pending_institutions %}
+        <table class="table" style="font-size:.85rem">
+          <thead><tr><th>Name</th><th>Code</th><th>Registered</th><th></th></tr></thead>
+          <tbody>
+            {% for inst in pending_institutions %}
+            <tr>
+              <td>{{ inst.name }}</td>
+              <td><code>{{ inst.short_code }}</code></td>
+              <td class="faint">{{ inst.created_at|date }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin.approve_institution', inst_id=inst.id) }}" style="display:inline">
+                  <button class="btn btn-primary btn-sm" type="submit">Approve</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="faint small" style="margin:0">No pending institutions 🎉</p>
+      {% endif %}
+      <a href="{{ url_for('admin.institutions') }}" class="btn btn-ghost btn-sm" style="align-self:flex-start">View All →</a>
+    </div>
+
+    {# ── Recent Users ── #}
+    <div class="card stack" style="gap:1rem">
+      <h3 style="margin:0">👤 Recent Registrations</h3>
+      <table class="table" style="font-size:.85rem">
+        <thead><tr><th>Username</th><th>Role</th><th>Joined</th><th>Active</th></tr></thead>
+        <tbody>
+          {% for u in recent_users %}
+          <tr>
+            <td>{{ u.username }}</td>
+            <td><span class="badge-role">{{ u.role }}</span></td>
+            <td class="faint">{{ u.created_at|date }}</td>
+            <td>
+              {% if u.is_active %}<span class="badge badge-valid" style="font-size:.75rem">Yes</span>
+              {% else %}<span class="badge badge-revoked" style="font-size:.75rem">No</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <a href="{{ url_for('admin.users') }}" class="btn btn-ghost btn-sm" style="align-self:flex-start">View All →</a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

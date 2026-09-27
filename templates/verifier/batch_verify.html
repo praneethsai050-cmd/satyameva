@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}Batch Verification · Verifier Portal{% endblock %}
+
+{% block content %}
+<div class="stack stack-8">
+
+  <!-- ══ Breadcrumb & Header ════════════════════════════════════════════ -->
+  <div class="stack stack-3">
+    <a class="small faint" href="{{ url_for('verifier.dashboard') }}">← Back to verifier dashboard</a>
+
+    <div class="row row-between" style="align-items:flex-start; gap:1rem">
+      <div>
+        <span class="hero-kicker">⚡ Enterprise Batch Verification</span>
+        <h1 style="margin-top:.6rem">Verify Multiple Credentials</h1>
+        <p class="muted" style="margin-top:.4rem; max-width:64ch">
+          Upload a CSV spreadsheet with candidate certificate hashes or paste multiple SHA-256 hashes
+          to verify institutional authenticity against the Satyameva blockchain in bulk.
+        </p>
+      </div>
+
+      <a class="btn btn-ghost" href="{{ url_for('verifier.history') }}">
+        <span aria-hidden="true">📜</span> View Verification History
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ Input Section ═══════════════════════════════════════════════════ -->
+  <div class="grid" style="grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 1.75rem; align-items:start">
+    <section class="panel card3d" data-tilt="2" data-tilt-lift="6">
+      <div class="panel-title">📥 Upload CSV or Paste Hashes</div>
+
+      <form method="post" action="{{ url_for('verifier.batch_verify') }}" enctype="multipart/form-data" class="stack stack-4">
+        
+        <!-- CSV File Upload -->
+        <div>
+          <label class="field-label" for="csv_file">Upload CSV File</label>
+          <input type="file" id="csv_file" name="csv_file" class="input" accept=".csv,text/csv">
+          <span class="tiny faint" style="display:block; margin-top:.35rem">
+            Accepts any CSV with a <code>hash</code> or <code>doc_hash</code> column header.
+          </span>
+        </div>
+
+        <div class="row row-between tiny faint center" style="margin:.25rem 0">
+          <hr class="divider" style="flex:1">
+          <span style="padding:0 1rem; text-transform:uppercase">OR</span>
+          <hr class="divider" style="flex:1">
+        </div>
+
+        <!-- Raw Text Hashes -->
+        <div>
+          <label class="field-label" for="raw_hashes">Paste Hashes (One per line or comma-separated)</label>
+          <textarea id="raw_hashes" name="raw_hashes" class="input mono" rows="6" placeholder="8b18e91d217434da...&#10;f9ed1b275232db00...&#10;4e0d5997d8aa7fed..."></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">
+          <span aria-hidden="true">⚡</span> Run Batch Verification
+        </button>
+      </form>
+    </section>
+
+    <!-- Instructions / Sample Info -->
+    <section class="panel panel-tight">
+      <div class="panel-title">💡 Batch Verification Tips</div>
+      <div class="stack stack-3 small muted">
+        <p style="margin:0">
+          Each submitted hash is checked for existence on the ledger, validity period, issuer revocation,
+          and cryptographic digital signature integrity.
+        </p>
+        <p style="margin:0">
+          Every valid lookup will also trigger a verification notification on the student's portal timeline.
+        </p>
+        <div style="background:var(--surface); padding:.85rem; border-radius:var(--r-sm); font-size:.8rem">
+          <b>Sample CSV Format:</b>
+          <pre class="mono" style="margin:.35rem 0 0; color:var(--indigo-lit)">hash,candidate_name
+8b18e91d217434da...,Aarav Sharma
+f9ed1b275232db00...,Priya Nair</pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ Results Section ═════════════════════════════════════════════════ -->
+  {% if stats.total > 0 %}
+    <section class="stack stack-4">
+      <div class="row row-between" style="align-items:center">
+        <h2>Batch Verification Results ({{ stats.total }})</h2>
+        <div class="row" style="gap:.5rem">
+          <span class="badge badge-valid">✅ {{ stats.valid }} Authentic</span>
+          {% if stats.expired %}<span class="badge badge-expiring">⌛ {{ stats.expired }} Expired</span>{% endif %}
+          {% if stats.tampered %}<span class="badge badge-revoked">🛑 {{ stats.tampered }} Tampered</span>{% endif %}
+          {% if stats.revoked %}<span class="badge badge-revoked">🚫 {{ stats.revoked }} Revoked</span>{% endif %}
+          {% if stats.not_found %}<span class="badge badge-neutral">✕ {{ stats.not_found }} Not Found</span>{% endif %}
+        </div>
+      </div>
+
+      <div class="panel" style="padding:0; overflow:hidden">
+        <div style="overflow-x:auto">
+          <table style="width:100%; border-collapse:collapse; font-size:.9rem; text-align:left">
+            <thead>
+              <tr style="background:var(--surface-2); border-bottom:1px solid var(--border)">
+                <th style="padding:.85rem 1rem">Status</th>
+                <th style="padding:.85rem 1rem">Hash</th>
+                <th style="padding:.85rem 1rem">Document Title</th>
+                <th style="padding:.85rem 1rem">Holder</th>
+                <th style="padding:.85rem 1rem">Block #</th>
+                <th style="padding:.85rem 1rem; text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in results %}
+                {% set outcome = item.outcome %}
+                {% set doc = item.doc %}
+                <tr style="border-bottom:1px solid var(--border); transition:background var(--fast)">
+                  <td style="padding:.85rem 1rem">
+                    <span class="badge badge-{{ 'valid' if outcome.result == 'VALID' else ('expiring' if outcome.result == 'EXPIRED' else 'revoked') }}">
+                      {{ outcome.result.replace('_', ' ') }}
+                    </span>
+                  </td>
+                  <td style="padding:.85rem 1rem" class="mono tiny">
+                    {{ item.hash|short_hash }}
+                  </td>
+                  <td style="padding:.85rem 1rem">
+                    {% if doc %}
+                      <b>{{ doc.title }}</b>
+                      <div class="tiny faint">{{ doc.type_label }}</div>
+                    {% else %}
+                      <span class="faint">Unregistered credential</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding:.85rem 1rem">
+                    {% if doc and doc.student %}
+                      {{ doc.student.full_name }}
+                      <div class="tiny faint mono">Roll {{ doc.student.roll_number }}</div>
+                    {% else %}
+                      <span class="faint">—</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding:.85rem 1rem" class="mono small">
+                    {% if item.block %}
+                      #{{ item.block.index }}
+                    {% else %}
+                      <span class="faint">—</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding:.85rem 1rem; text-align:right">
+                    <a class="btn btn-ghost btn-sm" href="{{ url_for('verifier.verify_hash_result', doc_hash=item.hash) }}">
+                      Inspect →
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+</div>
+{% endblock %}

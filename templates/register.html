@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% block title %}Create an Account{% endblock %}
+
+{% block chrome %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block main_attrs %}class="login-shell"{% endblock %}
+
+{% block content %}
+  <section class="login-visual">
+    <canvas class="hero-canvas" data-hero3d aria-hidden="true"></canvas>
+
+    <div style="position:relative; z-index:2; padding: 2rem 0">
+      <a class="brand" href="{{ url_for('public.verify') }}" style="margin-bottom:2rem">
+        <span class="brand-cube" aria-hidden="true"><i></i></span>
+        <span>
+          <span class="brand-name" style="font-size:1.4rem">{{ brand }}</span>
+          <span class="brand-sub">{{ tagline }}</span>
+        </span>
+      </a>
+
+      <h1 style="margin-top:1.5rem; max-width:16ch">
+        Join the ecosystem of trust.
+      </h1>
+
+      <p class="hero-lead" style="margin-top:1rem">
+        Whether you are a student securing your academic records, an institution issuing credentials, or an employer verifying them—Satyameva brings transparency and immutable proof.
+      </p>
+
+      <div class="chain-fallback" aria-hidden="true" style="margin-top:1.75rem">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-card" style="justify-self:center; max-width:500px">
+    <div class="stack stack-6">
+      <div>
+        <span class="hero-kicker">✨ New Account</span>
+        <h2 style="margin-top:.75rem">Register</h2>
+      </div>
+
+      <form method="post" action="{{ url_for('auth.register') }}" class="stack stack-4" novalidate>
+
+        <!-- ── Role selector (visual cards) ───────────────────────────── -->
+        <div>
+          <label class="field-label" style="margin-bottom:.75rem">Choose your role</label>
+
+          <div class="role-cards" role="group" aria-label="Select a role">
+
+            <button type="button" class="role-card" data-role="student"
+                    aria-pressed="false">
+              <span class="role-card-check" aria-hidden="true">✓</span>
+              <span class="role-card-icon" aria-hidden="true">🎓</span>
+              <span class="role-card-name">Student</span>
+              <span class="role-card-desc">View &amp; share your academic credentials</span>
+            </button>
+
+            <button type="button" class="role-card" data-role="issuer"
+                    aria-pressed="false">
+              <span class="role-card-check" aria-hidden="true">✓</span>
+              <span class="role-card-icon" aria-hidden="true">🏛️</span>
+              <span class="role-card-name">Issuer</span>
+              <span class="role-card-desc">Issue &amp; manage credentials on behalf of an institution</span>
+            </button>
+
+            <button type="button" class="role-card" data-role="verifier"
+                    aria-pressed="false">
+              <span class="role-card-check" aria-hidden="true">✓</span>
+              <span class="role-card-icon" aria-hidden="true">🔍</span>
+              <span class="role-card-name">Verifier</span>
+              <span class="role-card-desc">Authenticate credentials as an employer or auditor</span>
+            </button>
+
+          </div>
+
+          <!-- Hidden input carries the selected role to the backend -->
+          <input type="hidden" id="role" name="role" required>
+          <div class="role-error" id="role-error" style="display:none">
+            Please select a role to continue.
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="username">Username</label>
+          <input class="input" id="username" name="username" type="text" required placeholder="Choose a username">
+        </div>
+        
+        <div>
+          <label class="field-label" for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" required placeholder="name@example.com">
+        </div>
+
+        <div>
+          <label class="field-label" for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" required placeholder="Create a secure password">
+        </div>
+
+        <!-- Student-specific fields -->
+        <div id="student_fields" class="role-fields stack stack-4">
+          <div class="role-fields-label">
+            <span aria-hidden="true">🎓</span> Student details
+          </div>
+          <div>
+            <label class="field-label" for="student_campus">University Campus *</label>
+            <select class="input" id="student_campus" name="campus_select">
+              <option value="JIIT">Jaypee Institute of Information Technology (JIIT Noida)</option>
+              <option value="JUIT">Jaypee University of Information Technology (JUIT Waknaghat)</option>
+              <option value="JUET">Jaypee University of Engineering & Technology (JUET Guna)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="full_name">Full Name</label>
+            <input class="input" id="full_name" name="full_name" type="text" placeholder="As per academic records">
+          </div>
+          <div>
+            <label class="field-label" for="roll_number">Roll Number</label>
+            <input class="input" id="roll_number" name="roll_number" type="text" placeholder="e.g. 22103045">
+          </div>
+          <div>
+            <label class="field-label" for="program">Program</label>
+            <input class="input" id="program" name="program" type="text" placeholder="e.g. B.Tech CSE">
+          </div>
+        </div>
+
+        <!-- Issuer/Verifier-specific fields -->
+        <div id="org_fields" class="role-fields stack stack-4">
+          <div class="role-fields-label">
+            <span aria-hidden="true" id="org-icon">🏛️</span>
+            <span id="org-label">Organisation details</span>
+          </div>
+          <div id="campus_select_row">
+            <label class="field-label" for="issuer_campus">University Campus</label>
+            <select class="input" id="issuer_campus" name="campus_select">
+              <option value="JIIT">Jaypee Institute of Information Technology (JIIT Noida)</option>
+              <option value="JUIT">Jaypee University of Information Technology (JUIT Waknaghat)</option>
+              <option value="JUET">Jaypee University of Engineering & Technology (JUET Guna)</option>
+              <option value="OTHER">Other / Corporate Employer</option>
+            </select>
+          </div>
+          <div id="custom_org_row">
+            <label class="field-label" for="organization">Organization Name (if Other or Verifier)</label>
+            <input class="input" id="organization" name="organization" type="text" placeholder="Institution or Company name">
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:1rem">
+          Create Account <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <div class="row row-between tiny faint">
+        <span>Already have an account?</span>
+        <a href="{{ url_for('auth.login') }}">Sign in →</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ── Role cards ──────────────────────────────────────────────────── */
+    .role-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+    }
+    @media (max-width: 480px) {
+      .role-cards { grid-template-columns: 1fr; }
+    }
+
+    .role-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .35rem;
+      padding: 1rem .75rem;
+      background: var(--surface-alt, #f6f7fd);
+      border: 2px solid var(--border-color, #dde2f0);
+      border-radius: var(--radius-card, 14px);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color .2s, box-shadow .2s, opacity .2s, transform .15s;
+      font-family: inherit;
+      color: inherit;
+    }
+    .role-card:hover {
+      border-color: var(--indigo, #2f6bed);
+      transform: translateY(-2px);
+    }
+    .role-card.selected {
+      border-color: var(--indigo, #2f6bed);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--indigo, #2f6bed) 18%, transparent),
+                  0 6px 20px color-mix(in srgb, var(--indigo, #2f6bed) 14%, transparent);
+      background: color-mix(in srgb, var(--indigo, #2f6bed) 6%, var(--surface-alt, #f6f7fd));
+    }
+    /* dim unselected cards once a choice has been made */
+    .role-cards.has-selection .role-card:not(.selected) {
+      opacity: .55;
+    }
+
+    /* Checkmark badge — hidden until selected */
+    .role-card-check {
+      position: absolute;
+      top: .45rem; right: .55rem;
+      width: 1.25rem; height: 1.25rem;
+      background: var(--indigo, #2f6bed);
+      color: #fff;
+      border-radius: 50%;
+      font-size: .7rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transform: scale(.5);
+      transition: opacity .18s, transform .18s;
+    }
+    .role-card.selected .role-card-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .role-card-icon { font-size: 1.9rem; line-height: 1; }
+    .role-card-name { font-weight: 700; font-size: .92rem; }
+    .role-card-desc { font-size: .74rem; color: var(--text-muted, #6e7496); line-height: 1.35; }
+
+    .role-error {
+      margin-top: .5rem;
+      padding: .45rem .75rem;
+      border-radius: 8px;
+      background: #fdecea;
+      color: #c0392b;
+      font-size: .84rem;
+    }
+
+    /* ── Role-specific fields (animated reveal) ──────────────────────── */
+    .role-fields {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-top: 0px solid var(--border-color, #dde2f0);
+      transition: max-height .35s ease, opacity .3s ease,
+                  padding .3s ease, border-top-width .3s ease;
+      pointer-events: none;
+    }
+    .role-fields.visible {
+      max-height: 600px;
+      opacity: 1;
+      padding-top: 1rem;
+      padding-bottom: .25rem;
+      border-top: 1px solid var(--border-color, #dde2f0);
+      pointer-events: auto;
+    }
+    .role-fields-label {
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--indigo, #2f6bed);
+      display: flex; align-items: center; gap: .4rem;
+    }
+  </style>
+
+  <script>
+    (function () {
+      var cards       = document.querySelectorAll('.role-card');
+      var cardsWrap   = document.querySelector('.role-cards');
+      var roleInput   = document.getElementById('role');
+      var roleError   = document.getElementById('role-error');
+      var studentFields = document.getElementById('student_fields');
+      var orgFields     = document.getElementById('org_fields');
+      var orgIcon       = document.getElementById('org-icon');
+      var orgLabel      = document.getElementById('org-label');
+
+      function selectRole(role) {
+        roleInput.value = role;
+        roleError.style.display = 'none';
+        cardsWrap.classList.add('has-selection');
+
+        cards.forEach(function (c) {
+          var isThis = c.dataset.role === role;
+          c.classList.toggle('selected', isThis);
+          c.setAttribute('aria-pressed', isThis ? 'true' : 'false');
+        });
+
+        if (role === 'student') {
+          studentFields.classList.add('visible');
+          orgFields.classList.remove('visible');
+        } else if (role === 'issuer') {
+          studentFields.classList.remove('visible');
+          orgFields.classList.add('visible');
+          orgIcon.textContent  = '🏛️';
+          orgLabel.textContent = 'Institution details';
+        } else if (role === 'verifier') {
+          studentFields.classList.remove('visible');
+          orgFields.classList.add('visible');
+          orgIcon.textContent  = '🔍';
+          orgLabel.textContent = 'Employer / auditor details';
+        }
+      }
+
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          selectRole(card.dataset.role);
+        });
+      });
+
+      // Guard: show inline error if role not chosen on submit
+      var form = document.querySelector('form[method="post"]');
+      form.addEventListener('submit', function (e) {
+        if (!roleInput.value) {
+          e.preventDefault();
+          roleError.style.display = 'block';
+          roleError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }());
+  </script>
+{% endblock %}

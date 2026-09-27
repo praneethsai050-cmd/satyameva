@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Admin · Users{% endblock %}
+
+{% block content %}
+<div class="stack" style="gap:1.5rem">
+
+  <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h1 style="margin:0;font-size:1.6rem">👥 User Management</h1>
+      <p class="faint small" style="margin:.25rem 0 0">{{ pagination.total }} total · page {{ pagination.page }}/{{ pagination.pages }}</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+
+  {# Filters #}
+  <form method="get" class="row" style="gap:.75rem;flex-wrap:wrap">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Search username / email…" style="max-width:260px">
+    <select class="form-control" name="role" style="max-width:160px">
+      <option value="">All roles</option>
+      {% for r in ['student','issuer','verifier','admin'] %}
+      <option value="{{ r }}" {% if role_filter == r %}selected{% endif %}>{{ r|capitalize }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary btn-sm" type="submit">Filter</button>
+    {% if q or role_filter %}<a href="{{ url_for('admin.users') }}" class="btn btn-ghost btn-sm">Clear</a>{% endif %}
+  </form>
+
+  <div class="card" style="overflow-x:auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Username</th><th>Email</th><th>Role</th>
+          <th>Institution</th><th>OAuth</th><th>Joined</th><th>Active</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in pagination.items %}
+        <tr>
+          <td class="faint small">{{ u.id }}</td>
+          <td><b>{{ u.username }}</b></td>
+          <td class="faint small">{{ u.email }}</td>
+          <td><span class="badge-role">{{ u.role }}</span></td>
+          <td class="faint small">{{ u.institution.short_code if u.institution else '—' }}</td>
+          <td class="faint small">{{ u.oauth_provider or '—' }}</td>
+          <td class="faint small">{{ u.created_at|date }}</td>
+          <td>
+            {% if u.is_active %}<span class="badge badge-valid" style="font-size:.75rem">Yes</span>
+            {% else %}<span class="badge badge-revoked" style="font-size:.75rem">No</span>{% endif %}
+          </td>
+          <td>
+            {% if u.role != 'admin' %}
+            <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" style="display:inline">
+              <button class="btn btn-ghost btn-sm" type="submit"
+                      title="{{ 'Deactivate' if u.is_active else 'Activate' }}">
+                {{ '🚫 Deactivate' if u.is_active else '✅ Activate' }}
+              </button>
+            </form>
+            {% else %}
+            <span class="faint small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="faint" style="text-align:center;padding:2rem">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Pagination #}
+  {% if pagination.pages > 1 %}
+  <div class="row" style="gap:.5rem;justify-content:center">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.users', page=pagination.prev_num, q=q, role=role_filter) }}" class="btn btn-ghost btn-sm">← Prev</a>
+    {% endif %}
+    <span class="faint small" style="align-self:center">{{ pagination.page }} / {{ pagination.pages }}</span>
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.users', page=pagination.next_num, q=q, role=role_filter) }}" class="btn btn-ghost btn-sm">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

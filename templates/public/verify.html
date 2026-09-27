@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Verify a credential{% endblock %}
+
+{% block content %}
+<div class="stack stack-8">
+
+  <!-- ══ Hero ════════════════════════════════════════════════════════════ -->
+  <section class="hero scene">
+    <canvas class="hero-canvas" data-hero3d aria-hidden="true"></canvas>
+
+    <div class="hero-body">
+      <div class="hero-campus-pill" style="margin-bottom:0.75rem">
+        <span>🎓 Jaypee Academic Verification Network</span>
+      </div>
+      <h1>Verify Jaypee University <em style="color:var(--campus-accent, #60a5fa); font-style:normal">Credentials</em></h1>
+      <p class="hero-lead">
+        Instant tamper-proof verification for degrees, diplomas, and transcripts issued across <strong>JIIT Noida</strong>, <strong>JUIT Waknaghat</strong>, and <strong>JUET Guna</strong>.
+        Paste the 64-character SHA-256 hash or scan the student's dynamic QR code — validated against the immutable blockchain ledger in under five seconds.
+      </p>
+
+      <!-- ── The form ─────────────────────────────────────────────────── -->
+      <form class="stack stack-3" method="post" action="{{ url_for('public.verify') }}"
+            style="margin-top:1.5rem; max-width:44rem">
+        <label class="field">
+          <span class="field-icon" aria-hidden="true">#</span>
+          <span class="sr-only">Credential hash</span>
+          <input class="input mono" type="text" name="doc_hash" required
+                 autocomplete="off" spellcheck="false"
+                 pattern="[0-9a-fA-F]{16,64}"
+                 title="A hexadecimal SHA-256 hash"
+                 placeholder="paste the 64-character SHA-256 hash…"
+                 value="{{ request.form.get('doc_hash', '') }}"
+                 {% if error %}autofocus{% endif %}>
+        </label>
+
+        {% if error %}
+          <div class="alert alert-danger">
+            <span class="alert-icon" aria-hidden="true">⛔</span>
+            <div><div class="alert-body">{{ error }}</div></div>
+          </div>
+        {% endif %}
+
+        <div class="row">
+          <button class="btn btn-primary" type="submit">
+            <span aria-hidden="true">🔎</span> Verify now
+          </button>
+          <span class="tiny faint">
+            Every check is logged and cryptographically audited.
+          </span>
+        </div>
+      </form>
+    </div>
+
+    <div class="hero-aside">
+      <div class="chain-fallback" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p class="chain-caption tiny faint center">
+        JIIT · JUIT · JUET Official Ledger · SHA-256 Anchored
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ How it works ════════════════════════════════════════════════════ -->
+  <section class="stack stack-4">
+    <h2 style="font-size:1.05rem">How verification works</h2>
+
+    <div class="grid grid-stats scene" data-stagger>
+      {% for icon, label, body in [
+        ('1️⃣', 'Get the hash',
+         'From the QR code on the stamped copy, or the 64-character hash printed beside the seal.'),
+        ('2️⃣', 'We re-derive it',
+         'The stored record is hashed again from scratch and compared against what was anchored to the chain.'),
+        ('3️⃣', 'You get a verdict',
+         'Authentic, expired, revoked or tampered — with the block that proves it.'),
+      ] %}
+        <div class="stat card3d" data-tilt="6" data-tilt-lift="10">
+          <span class="stat-glow" aria-hidden="true"></span>
+          <span class="card3d-glare" aria-hidden="true"></span>
+          <div class="stat-head depth-1">
+            <span class="stat-label">{{ label }}</span>
+            <span class="stat-icon" aria-hidden="true">{{ icon }}</span>
+          </div>
+          <div class="stat-foot" style="margin-top:.75rem">{{ body }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ══ What the verdicts mean ══════════════════════════════════════════ -->
+  <section class="panel">
+    <div class="panel-title">🏷️ What each verdict means</div>
+    <div class="dl">
+      {% for cls, name, meaning in [
+        ('valid',    'Authentic',  'On the ledger, hash matches, inside its validity window.'),
+        ('expiring', 'QR expired', 'The code was genuine but older than 60 seconds — ask for a fresh one.'),
+        ('expired',  'Expired',    'Genuine credential, past its validity date.'),
+        ('revoked',  'Revoked',    'The issuing institution withdrew this credential.'),
+        ('revoked',  'Tampered',   'The stored record no longer matches its blockchain hash.'),
+        ('expired',  'Not found',  'No such hash on the ledger. The document is not authentic.'),
+      ] %}
+        <div class="dl-row">
+          <span class="dl-key">
+            <span class="badge badge-{{ cls }}" style="font-size:.65rem">{{ name }}</span>
+          </span>
+          <span class="dl-val" style="font-family:inherit">{{ meaning }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <hr class="divider">
+
+    <p class="tiny faint" style="margin:0">
+      A screenshot of someone else's QR code will not verify: each code carries a
+      signed token that dies after
+      {{ config.QR_TOKEN_TTL_SECONDS or 60 }} seconds, which is what stops replay.
+    </p>
+  </section>
+
+  <!-- ══ 3D Interactive Blockchain Visualizer ══════════════════════════════ -->
+  <section class="stack stack-3">
+    <div class="row row-between" style="align-items:center">
+      <div>
+        <h2 style="font-size:1.25rem;margin:0">⛓️ Live Blockchain 3D Ledger</h2>
+        <p class="small faint" style="margin:.2rem 0 0">Interactive WebGL cryptographic network · Click and drag to rotate nodes</p>
+      </div>
+      <span class="badge badge-valid" style="font-size:.78rem">3D WebGL Ledger</span>
+    </div>
+
+    <div class="blockchain-3d-wrapper" id="blockchain-3d-container">
+      <div class="blockchain-3d-badge">
+        <span aria-hidden="true" style="color:var(--indigo-lit)">🧊</span>
+        <span>Satyameva Public Chain Nodes</span>
+      </div>
+      <div class="blockchain-3d-hint">
+        <span>Click &amp; drag to inspect blocks in 3D</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

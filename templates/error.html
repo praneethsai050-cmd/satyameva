@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }} · {{ title }}{% endblock %}
+
+{% block content %}
+<div class="center stack stack-6" style="max-width:56ch; margin:clamp(2rem,8vh,6rem) auto">
+
+  <div class="scene">
+    {# The code itself as a 3D plate — tilts under the pointer like the cards. #}
+    <div class="card3d panel" data-tilt="9" data-tilt-lift="18"
+         style="display:inline-block; padding:2rem 2.75rem">
+      <span class="card3d-glare" aria-hidden="true"></span>
+      <div class="depth-2" style="font-size:clamp(3rem,10vw,5.5rem); font-weight:800;
+                                  line-height:1; letter-spacing:-.04em; color:#fff;
+                                  text-shadow:0 0 40px rgba(106,161,255,.45)">
+        {{ code }}
+      </div>
+      <div class="tiny upper faint depth-1" style="margin-top:.55rem; letter-spacing:.18em">
+        {{ title }}
+      </div>
+    </div>
+  </div>
+
+  <div class="stack stack-3">
+    <h1 style="font-size:clamp(1.3rem,3vw,1.75rem)">{{ title }}</h1>
+    <p class="muted">{{ message }}</p>
+  </div>
+
+  <div class="row" style="justify-content:center">
+    {% if current_user.is_authenticated %}
+      <a class="btn btn-primary" href="{{ url_for(current_user.home_endpoint()) }}">
+        <span aria-hidden="true">🏠</span> Back to my portal
+      </a>
+      <a class="btn btn-ghost" href="{{ url_for('public.verify') }}">Verify a credential</a>
+    {% else %}
+      <a class="btn btn-primary" href="{{ url_for('auth.login') }}">
+        <span aria-hidden="true">🔐</span> Sign in
+      </a>
+      <a class="btn btn-ghost" href="{{ url_for('public.verify') }}">Verify a credential</a>
+    {% endif %}
+  </div>
+
+  {% if code == 403 %}
+    <p class="tiny faint" style="margin:0">
+      Access is scoped by role — a student can only ever open their own
+      credentials, which is enforced on every request, not just in the menu.
+    </p>
+  {% elif code == 404 %}
+    <p class="tiny faint" style="margin:0">
+      If you followed a QR code, ask for a freshly generated one: dynamic codes
+      expire after {{ config.QR_TOKEN_TTL_SECONDS or 60 }} seconds by design.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

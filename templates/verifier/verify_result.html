@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% block title %}Verification result{% endblock %}
+
+{% block content %}
+{#
+  Verdict presentation, keyed off the service's `result` string. Kept in one
+  place so the seal, the colour and the headline can never drift apart.
+#}
+{% set VERDICTS = {
+  'VALID':      ('ok',   '✓',  'Authentic credential'),
+  'EXPIRED':    ('warn', '⌛', 'Genuine, but expired'),
+  'QR_EXPIRED': ('warn', '⏱️', 'This QR code has expired'),
+  'REVOKED':    ('bad',  '🚫', 'Revoked by the issuer'),
+  'TAMPERED':   ('bad',  '🛑', 'Integrity check failed'),
+  'NOT_FOUND':  ('bad',  '✕',  'Not on the ledger'),
+} %}
+{% set tone, seal, headline = VERDICTS.get(outcome.result, ('bad', '?', 'Unrecognised result')) %}
+
+{# A failed QR token may be a replayed screenshot, so the holder's identity is
+   withheld until a valid code is presented. #}
+{% set reveal = doc and outcome.result != 'QR_EXPIRED' %}
+
+<div class="stack stack-6" style="max-width:60rem; margin-inline:auto">
+
+  <!-- ══ Verdict ═════════════════════════════════════════════════════════ -->
+  <section class="verdict verdict-{{ tone }}">
+    <span class="verdict-seal" aria-hidden="true">{{ seal }}</span>
+    <div style="min-width:0">
+      <h2>{{ headline }}</h2>
+      <p class="muted small" style="margin:0">{{ outcome.message }}</p>
+
+      <div class="row" style="gap:.45rem; margin-top:.85rem">
+        <span class="badge badge-{{ 'valid' if tone == 'ok'
+                                    else ('expiring' if tone == 'warn' else 'revoked') }}">
+          {{ outcome.result.replace('_', ' ') }}
+        </span>
+        {% if was_dynamic %}
+          <span class="badge badge-neutral" title="A signed, time-limited QR token was presented">
+            📷 Live QR scan
+          </span>
+        {% else %}
+          <span class="badge badge-neutral" title="Verified from a permanent link, not a live code">
+            🔗 Permanent link
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ The hash that was checked ═══════════════════════════════════════ -->
+  <section class="panel">
+    <div class="row row-between" style="margin-bottom:.6rem">
+      <span class="tiny upper faint">Hash submitted</span>
+      <span class="swatches" aria-hidden="true" title="Visual fingerprint">
+        {% for colour in swatches %}<i style="background:{{ colour }}"></i>{% endfor %}
+      </span>
+    </div>
+    <div class="hash-box">
+      <span class="hash-text">{{ queried_hash }}</span>
+      <button class="btn btn-icon btn-ghost" type="button" data-copy="{{ queried_hash }}"
+              data-copy-label="Hash copied" title="Copy hash" aria-label="Copy hash">⧉</button>
+    </div>
+
+    {% if outcome.result == 'NOT_FOUND' %}
+      <p class="small" style="margin:.85rem 0 0; color:var(--red-lit)">
+        Nothing on the {{ brand }} chain corresponds to this hash. Either the
+        hash was mistyped, or the document it came from was not issued through a
+        {{ brand }} institution.
+      </p>
+    {% elif outcome.result == 'TAMPERED' %}
+      <p class="small" style="margin:.85rem 0 0; color:var(--red-lit)">
+        The record exists, but re-hashing its stored contents produces a
+        different digest from the one anchored on the chain. Something was
+        edited after issuance. Do not accept this document.
+      </p>
+    {% elif outcome.result == 'QR_EXPIRED' %}
+      <p class="small" style="margin:.85rem 0 0">
+        Ask the holder to tap <b>New code</b> and scan again. Codes are valid for
+        {{ config.QR_TOKEN_TTL_SECONDS or 60 }} seconds only — that is what stops
+        a forwarded screenshot from passing as a live presentation.
+      </p>
+    {% endif %}
+  </section>
+
+  {% if reveal %}
+    <!-- ══ Credential ════════════════════════════════════════════════════ -->
+    <div class="grid scene" id="result-grid"
+         style="grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+                align-items:start; gap:1.25rem">
+
+      <section class="panel card3d" data-tilt="4" data-tilt-lift="10">
+        <span class="card3d-glare" aria-hidden="true"></span>
+        <div class="panel-title depth-1">🎓 Credential</div>
+
+        <div class="row depth-2" style="align-items:flex-start; gap:.85rem;
+                                        margin-bottom:1rem">
+          <span class="doc-type-icon" aria-hidden="true">{{ doc.type_icon }}</span>
+          <div style="min-width:0">
+            <div class="tiny upper faint">{{ doc.type_label }}</div>
+            <b>{{ doc.title }}</b>
+          </div>
+        </div>
+
+        <div class="dl">
+          <div class="dl-row">
+            <span class="dl-key">Holder</span>
+            <span class="dl-val" style="font-family:inherit">{{ doc.student.full_name }}</span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Roll number</span>
+            <span class="dl-val mono">{{ doc.student.roll_number }}</span>
+          </div>
+          {% if doc.student.program %}
+            <div class="dl-row">
+              <span class="dl-key">Programme</span>
+              <span class="dl-val" style="font-family:inherit">
+                {{ doc.student.program }}{% if doc.student.batch %} · {{ doc.student.batch }}{% endif %}
+              </span>
+            </div>
+          {% endif %}
+          <div class="dl-row">
+            <span class="dl-key">Issued by</span>
+            <span class="dl-val" style="font-family:inherit">{{ doc.issuer_name or '—' }}</span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Issued on</span>
+            <span class="dl-val" style="font-family:inherit">{{ doc.issued_on|date }}</span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Valid until</span>
+            <span class="dl-val" style="font-family:inherit">
+              {{ doc.valid_until|date if doc.valid_until else 'No expiry' }}
+            </span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Status</span>
+            <span class="dl-val">
+              <span class="badge badge-{{ doc.status_class }}">{{ doc.status_label }}</span>
+            </span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Times verified</span>
+            <span class="dl-val" style="font-family:inherit">{{ doc.verification_count }}</span>
+          </div>
+        </div>
+
+        {% if doc.revoked and doc.revoked_reason %}
+          <hr class="divider">
+          <p class="small" style="margin:0; color:var(--red-lit)">
+            <b>Reason given:</b> {{ doc.revoked_reason }}
+          </p>
+        {% endif %}
+      </section>
+
+      <!-- ══ Ledger proof ════════════════════════════════════════════════ -->
+      <section class="panel card3d" data-tilt="4" data-tilt-lift="10">
+        <span class="card3d-glare" aria-hidden="true"></span>
+        <div class="panel-title depth-1">⛓️ Blockchain proof</div>
+
+        {% if block %}
+          <div class="dl">
+            <div class="dl-row">
+              <span class="dl-key">Block</span>
+              <span class="dl-val mono">#{{ block.index }}</span>
+            </div>
+            <div class="dl-row">
+              <span class="dl-key">Mined</span>
+              <span class="dl-val" style="font-family:inherit">
+                {{ block.timestamp|datetime }} UTC
+              </span>
+            </div>
+            <div class="dl-row">
+              <span class="dl-key">Proof of work</span>
+              <span class="dl-val mono">{{ block.proof }}</span>
+            </div>
+            <div class="dl-row">
+              <span class="dl-key">Block hash</span>
+              <span class="dl-val mono">{{ block.hash }}</span>
+            </div>
+            <div class="dl-row">
+              <span class="dl-key">Previous</span>
+              <span class="dl-val mono">{{ block.previous_hash }}</span>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          {# Three states, not two. A missing `chain_ok` means the verdict
+             short-circuited before the chain was walked — saying "not verified"
+             there accuses the ledger of failing a test it never sat. #}
+          {% set chain_state = outcome.get('chain_ok') %}
+          <div class="row">
+            <span class="chain-status {{ 'is-broken' if chain_state is not none and not chain_state }}"
+                  style="font-size:.76rem">
+              {% if chain_state %}🔗 chain intact
+              {% elif chain_state is none %}🔗 chain not walked for this check
+              {% else %}{{ outcome.get('chain_message') or 'chain broken' }}
+              {% endif %}
+            </span>
+          </div>
+
+          <p class="tiny faint" style="margin:.85rem 0 0">
+            Each block carries the previous block's hash, so altering this record
+            would break every block after it.
+            {% if chain_state is not none %}
+              The chain was re-validated end to end for this check.
+            {% endif %}
+          </p>
+        {% else %}
+          <p class="muted small" style="margin:0">
+            No block is being shown for this credential — the check stopped
+            before the ledger lookup{% if outcome.result == 'TAMPERED' %}
+            because the integrity test failed{% elif outcome.result == 'QR_EXPIRED' %}
+            because the QR token was not valid{% endif %}.
+          </p>
+        {% endif %}
+      </section>
+    </div>
+  {% endif %}
+
+  {% if block %}
+  <!-- ══ 3D Block Lock-In Visualizer ═══════════════════════════════════════ -->
+  <section class="stack stack-3">
+    <div class="row row-between" style="align-items:center">
+      <div>
+        <h3 style="margin:0;font-size:1.15rem">🧊 3D Ledger Verification: Block #{{ block.index }}</h3>
+        <p class="tiny faint" style="margin:0">Cryptographic lock-in verified on Satyameva immutable chain</p>
+      </div>
+      <span class="badge badge-valid" style="font-size:.7rem">Laser Lock-In Verified</span>
+    </div>
+    <div class="blockchain-3d-wrapper" id="blockchain-3d-container">
+      <div class="blockchain-3d-badge">
+        <span aria-hidden="true" style="color:var(--indigo-lit)">🔒</span>
+        <span>Target: Block #{{ block.index }}</span>
+      </div>
+      <div class="blockchain-3d-hint">
+        <span>Click &amp; drag to inspect the verified block node</span>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          if (window.lockInBlock3D) window.lockInBlock3D({{ block.index }});
+        }, 750);
+      });
+    </script>
+  </section>
+  {% endif %}
+
+  <!-- ══ Actions ═════════════════════════════════════════════════════════ -->
+  <div class="row no-print" style="justify-content:center">
+    <a class="btn btn-primary" href="{{ url_for('verifier.dashboard') }}">
+      <span aria-hidden="true">🔎</span> Verify another
+    </a>
+    <button class="btn btn-ghost" type="button" onclick="window.print()">
+      <span aria-hidden="true">🖨️</span> Print this result
+    </button>
+  </div>
+
+  {% if outcome.result in ['TAMPERED', 'NOT_FOUND', 'REVOKED'] %}
+  <section class="panel" style="margin-top:2rem; border-color:var(--red-lit)">
+    <div class="panel-title" style="color:var(--red-lit)">Report Fraudulent Document</div>
+    <p class="small">If you believe this document is forged, report it to the registry. Issuers and regulators monitor these reports.</p>
+    <form method="post" action="{{ url_for('verifier.report_fraud') }}" class="stack stack-3">
+        <input type="hidden" name="doc_hash" value="{{ queried_hash }}">
+        <label class="field">
+            <span class="sr-only">Notes</span>
+            <input class="input" type="text" name="notes" placeholder="Additional notes or context...">
+        </label>
+        <button type="submit" class="btn btn-danger">
+            <span aria-hidden="true">🚨</span> Submit Fraud Report
+        </button>
+    </form>
+  </section>
+  {% endif %}
+
+  <p class="tiny faint center" style="margin-top:2rem">
+    This check has been logged — the credential holder can see it in their
+    verification history, including your network address and the time.
+    {% if not was_dynamic and outcome.result == 'VALID' %}
+      A permanent link proves the credential is genuine and current — it does not
+      prove the person in front of you is the holder. Scan a live QR code for that.
+    {% endif %}
+  </p>
+
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+  @media (max-width: 880px) {
+    #result-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+{% endblock %}

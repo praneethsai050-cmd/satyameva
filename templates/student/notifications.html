@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+<div class="stack stack-6">
+
+  <!-- ══ Heading ═════════════════════════════════════════════════════════ -->
+  <div class="stack stack-3">
+    <a class="small faint" href="{{ url_for('student.dashboard') }}">← Back to dashboard</a>
+
+    <div class="row row-between" style="align-items:flex-start; gap:1rem">
+      <div>
+        <span class="hero-kicker">🔔 Notifications</span>
+        <h1 style="margin-top:.6rem">
+          {% if alert_count %}
+            {{ alert_count }} thing{{ '' if alert_count == 1 else 's' }} need your attention
+          {% else %}
+            Everything is in order
+          {% endif %}
+        </h1>
+        <p class="muted" style="margin-top:.4rem; max-width:62ch">
+          Alerts are derived live from your credentials, so they are accurate to
+          this second. You are warned {{ config.EXPIRY_WARNING_DAYS or 30 }} days
+          before anything expires.
+        </p>
+      </div>
+
+      <div class="row" style="gap:.5rem; align-items:center">
+        {% if alert_count %}
+          <form method="post" action="{{ url_for('student.mark_all_notifications_read') }}">
+            <button class="btn btn-ghost btn-sm" type="submit">Mark all read</button>
+          </form>
+          <span class="badge badge-expiring" style="flex:none">{{ alert_count }} new</span>
+        {% else %}
+          <span class="badge badge-valid" style="flex:none">All clear</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if alerts %}
+    {% set actionable = alerts | rejectattr('level', 'equalto', 'info') | list %}
+    {% set informational = alerts | selectattr('level', 'equalto', 'info') | list %}
+
+    <!-- ══ Needs action ══════════════════════════════════════════════════ -->
+    {% if actionable %}
+      <section class="stack stack-4">
+        <h2 style="font-size:1.05rem">⚠️ Needs action</h2>
+
+        <div class="stack stack-3 scene" data-stagger>
+          {% for alert in actionable %}
+            <article class="alert alert-{{ alert.level }} card3d"
+                     data-tilt="3" data-tilt-lift="8">
+              <span class="card3d-glare" aria-hidden="true"></span>
+              <span class="alert-icon" aria-hidden="true">{{ alert.icon }}</span>
+
+              <div style="flex:1; min-width:0">
+                <div class="row row-between" style="gap:.75rem; align-items:flex-start">
+                  <div style="min-width:0">
+                    <div class="alert-title">{{ alert.title }}</div>
+                    <div class="alert-body">{{ alert.body }}</div>
+                  </div>
+                  <span class="badge badge-{{ alert.doc.status_class }} nowrap"
+                        style="flex:none">{{ alert.doc.status_label }}</span>
+                </div>
+
+                <hr class="divider" style="margin:.85rem 0 .7rem">
+
+                <div class="row row-between" style="gap:.75rem">
+                  <span class="tiny faint">
+                    <span aria-hidden="true">{{ alert.doc.type_icon }}</span>
+                    {{ alert.doc.title }} ·
+                    <span class="mono">{{ alert.doc.doc_hash|short_hash }}</span>
+                  </span>
+
+                  <span class="row" style="gap:.4rem">
+                    <span class="tiny faint">{{ alert.action }}</span>
+                    <a class="btn btn-ghost btn-sm"
+                       href="{{ url_for('student.document_detail', doc_id=alert.doc.id) }}">
+                      Open →
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    <!-- ══ Activity ══════════════════════════════════════════════════════ -->
+    {% if informational %}
+      <section class="stack stack-4">
+        <div class="row row-between">
+          <h2 style="font-size:1.05rem">🔍 Verification activity</h2>
+          <a class="small" href="{{ url_for('student.all_history') }}">Full history →</a>
+        </div>
+
+        <div class="panel">
+          <div class="timeline">
+            {% for alert in informational %}
+              <div class="tl-item">
+                <span class="tl-dot tl-valid" aria-hidden="true"></span>
+                <div class="row row-between" style="gap:.75rem; align-items:flex-start">
+                  <div style="min-width:0">
+                    <b class="small">{{ alert.title }}</b>
+                    <div class="tl-time">{{ alert.body }}</div>
+                  </div>
+                  <a class="btn btn-ghost btn-sm nowrap"
+                     href="{{ url_for('student.document_history', doc_id=alert.doc.id) }}">
+                    {{ alert.action }}
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    <div class="alert alert-info">
+      <span class="alert-icon" aria-hidden="true">💡</span>
+      <div>
+        <div class="alert-title">An expired credential is still authentic</div>
+        <div class="alert-body">
+          Expiry does not remove the record from the blockchain — verifiers are
+          simply told the validity window has passed. A <b>revoked</b>
+          credential is different: the issuer withdrew it, and it fails
+          verification outright.
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="panel empty">
+      <div class="empty-art" aria-hidden="true">🎉</div>
+      <h3>Nothing needs your attention</h3>
+      <p class="muted" style="max-width:48ch; margin-inline:auto">
+        No credential is expiring, expired or revoked, and nothing has been
+        flagged. You will see a notice here
+        {{ config.EXPIRY_WARNING_DAYS or 30 }} days before anything lapses.
+      </p>
+      <a class="btn btn-primary" href="{{ url_for('student.dashboard') }}">
+        Back to my documents
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

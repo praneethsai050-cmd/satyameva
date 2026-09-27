@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Official Verification Audit Report{% endblock %}
+
+{% block content %}
+<div class="stack stack-6" style="max-width:56rem; margin-inline:auto">
+
+  <!-- Action Bar -->
+  <div class="row row-between no-print" style="margin-bottom:1rem">
+    <a class="btn btn-ghost" href="{{ url_for('verifier.history') }}">← Back to History</a>
+    <div class="row" style="gap:.5rem">
+      <a class="btn btn-ghost" href="{{ url_for('verifier.export_history_csv') }}">
+        <span aria-hidden="true">📊</span> Download CSV
+      </a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">
+        <span aria-hidden="true">🖨️</span> Print Official Report
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Printable Audit Certificate Sheet ═══════════════════════════════ -->
+  <article class="panel" style="background:var(--bg-2); border:2px solid var(--border-lit); padding:2.5rem; position:relative">
+    
+    <!-- Watermark / Background Emblem -->
+    <div style="position:absolute; right:2rem; top:2rem; opacity:.12; font-size:6rem; pointer-events:none" aria-hidden="true">
+      🛡️
+    </div>
+
+    <div class="stack stack-4">
+      <div class="row row-between" style="border-bottom:2px solid var(--border); padding-bottom:1.5rem">
+        <div class="stack" style="gap:.25rem">
+          <span class="hero-kicker">🏛️ Official Ledger Audit Record</span>
+          <h1 style="font-size:1.75rem">Verification Audit Statement</h1>
+          <span class="small muted">System: {{ brand }} Blockchain Ledger · SHA-256 Proof-of-Work</span>
+        </div>
+        <div class="stack" style="text-align:right; gap:.25rem">
+          <span class="tiny upper faint">Report Generated</span>
+          <b class="small mono">{{ utcnow()|datetime }} UTC</b>
+        </div>
+      </div>
+
+      <!-- Verifier Info & Cryptographic Anchor -->
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap:1.5rem; margin:1rem 0">
+        <div class="dl">
+          <div class="dl-row">
+            <span class="dl-key">Auditing Organization</span>
+            <span class="dl-val"><b>{{ current_user.organization or current_user.display_name }}</b></span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Account Handle</span>
+            <span class="dl-val mono">{{ current_user.username }}</span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Total Checks Logged</span>
+            <span class="dl-val mono">{{ stats.total }}</span>
+          </div>
+        </div>
+
+        <div class="dl">
+          <div class="dl-row">
+            <span class="dl-key">Authentic Records</span>
+            <span class="dl-val" style="color:var(--green-lit)"><b>{{ stats.valid }}</b></span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Flagged / Expired</span>
+            <span class="dl-val" style="color:var(--orange-lit)"><b>{{ stats.flagged }}</b></span>
+          </div>
+          <div class="dl-row">
+            <span class="dl-key">Audit Proof Hash</span>
+            <span class="dl-val mono tiny">{{ report_hash|short_hash }}</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Audit Entries Table -->
+      <h3 style="margin-top:.5rem">Audit Log Sample (Most Recent Checks)</h3>
+      <div style="overflow-x:auto">
+        <table style="width:100%; border-collapse:collapse; font-size:.85rem; text-align:left">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border); background:var(--surface)">
+              <th style="padding:.5rem .75rem">Timestamp</th>
+              <th style="padding:.5rem .75rem">Result</th>
+              <th style="padding:.5rem .75rem">Document / Candidate</th>
+              <th style="padding:.5rem .75rem">Hash</th>
+              <th style="padding:.5rem .75rem">Method</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:.5rem .75rem" class="nowrap tiny faint">
+                  {{ log.timestamp|datetime }}
+                </td>
+                <td style="padding:.5rem .75rem">
+                  <span class="badge badge-{{ log.result_class }}" style="font-size:.65rem">
+                    {{ log.result }}
+                  </span>
+                </td>
+                <td style="padding:.5rem .75rem">
+                  {% if log.doc %}
+                    <b>{{ log.doc.title }}</b>
+                    {% if log.doc.student %}
+                      <div class="tiny faint">{{ log.doc.student.full_name }} ({{ log.doc.student.roll_number }})</div>
+                    {% endif %}
+                  {% else %}
+                    <span class="faint">Unknown Record</span>
+                  {% endif %}
+                </td>
+                <td style="padding:.5rem .75rem" class="mono tiny">
+                  {{ (log.queried_hash or '')|short_hash }}
+                </td>
+                <td style="padding:.5rem .75rem" class="tiny faint">
+                  {{ log.method }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Institutional Sign-off Block -->
+      <div class="row row-between" style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border)">
+        <div class="stack" style="gap:.25rem; max-width:32ch">
+          <span class="tiny faint">Cryptographic Integrity Notice:</span>
+          <p class="tiny faint" style="margin:0">
+            This verification report certifies check results against an immutable Proof-of-Work blockchain ledger.
+          </p>
+        </div>
+
+        <div class="stack" style="text-align:right; align-items:flex-end">
+          <div style="border-bottom:1px solid var(--border-lit); width:14rem; margin-bottom:.5rem"></div>
+          <span class="small"><b>{{ current_user.display_name }}</b></span>
+          <span class="tiny faint">Authorized Verification Officer</span>
+        </div>
+      </div>
+
+    </div>
+  </article>
+
+</div>
+{% endblock %}

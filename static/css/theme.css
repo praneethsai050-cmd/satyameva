@@ -1,0 +1,511 @@
+/* ============================================================================
+   Satyameva — design tokens, reset and layout primitives
+   ============================================================================
+   A corporate blue/green trust palette on a deep canvas. Blue is the primary
+   brand hue and teal-green the secondary, so the brand gradient reads
+   blue→green — the conventional "secure / verified" pairing. Each hue keeps a
+   lighter on-dark variant, because a mid-tone blue does not carry enough
+   luminance for text or links against the near-black background.
+
+   The token names stay `--indigo` / `--purple` so the whole stylesheet did not
+   have to be renamed; only the *values* changed from the old indigo/purple. */
+
+:root {
+  /* ---- Brand (blue primary, teal-green secondary) ---- */
+  --indigo:        #2f6bed;   /* primary blue      */
+  --indigo-lit:    #6aa1ff;   /* blue, on-dark     */
+  --purple:        #0d9488;   /* secondary teal    */
+  --purple-lit:    #2dd4bf;   /* teal, on-dark     */
+
+  /* ---- Status ---- */
+  --green:         #43a047;
+  --green-lit:     #4ade80;
+  --orange:        #ffa726;
+  --orange-lit:    #fbbf24;
+  --red:           #e53935;
+  --red-lit:       #f87171;
+  --slate-lit:     #94a3b8;
+
+  /* ---- Canvas ---- */
+  --bg:            #08081a;
+  --bg-2:          #0f0f2e;
+  --bg-3:          #16163d;
+
+  /* ---- Glass surfaces ---- */
+  --surface:       rgba(255, 255, 255, 0.055);
+  --surface-2:     rgba(255, 255, 255, 0.085);
+  --surface-3:     rgba(255, 255, 255, 0.12);
+  --border:        rgba(255, 255, 255, 0.11);
+  --border-lit:    rgba(255, 255, 255, 0.2);
+
+  /* ---- Type ---- */
+  --text:          #f1f2fb;
+  --text-dim:      #a9aed2;
+  --text-faint:    #7a7fa6;
+
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Cascadia Code', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  /* ---- Geometry ---- */
+  --r-sm: 10px;
+  --r:    16px;
+  --r-lg: 22px;
+  --r-xl: 30px;
+
+  /* ---- Elevation. Layered shadows read as real depth; one flat shadow
+          reads as a sticker. ---- */
+  --sh-1: 0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.22);
+  --sh-2: 0 2px 6px rgba(0,0,0,.34), 0 12px 32px rgba(0,0,0,.3);
+  --sh-3: 0 6px 16px rgba(0,0,0,.4), 0 26px 60px rgba(0,0,0,.4);
+  --sh-glow: 0 0 0 1px rgba(106,161,255,.28), 0 12px 40px rgba(47,107,237,.3);
+
+  /* ---- Motion ---- */
+  --ease:      cubic-bezier(.22, 1, .36, 1);
+  --ease-back: cubic-bezier(.34, 1.56, .64, 1);
+  --fast: 160ms;
+  --med:  340ms;
+  --slow: 620ms;
+
+  /* ---- 3D ---- */
+  --persp: 1100px;
+}
+
+/* ─── Reset ────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0; line-height: 1.2; font-weight: 700; letter-spacing: -.02em; }
+h1 { font-size: clamp(1.75rem, 3.4vw, 2.6rem); }
+h2 { font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+h3 { font-size: 1.1rem; }
+p  { margin: 0 0 .8em; }
+a  { color: var(--indigo-lit); text-decoration: none; transition: color var(--fast); }
+a:hover { color: var(--purple-lit); }
+
+img, svg, canvas { max-width: 100%; display: block; }
+button { font: inherit; cursor: pointer; }
+
+code, .mono { font-family: var(--mono); font-size: .875em; }
+
+/* Visible focus for keyboard users — never remove the outline outright. */
+:focus-visible {
+  outline: 2px solid var(--indigo-lit);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ─── Animated mesh background ─────────────────────────────────────────── */
+/* Three slow-drifting radial blobs. Fixed and behind everything, so the
+   whole app feels like it sits on moving glass rather than a flat colour. */
+.mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(48rem 32rem at 12% -6%,  rgba(47,107,237,.30), transparent 62%),
+    radial-gradient(42rem 30rem at 92% 8%,   rgba(13,148,136,.28),  transparent 60%),
+    radial-gradient(50rem 34rem at 50% 108%, rgba(67,160,71,.14),   transparent 62%),
+    linear-gradient(175deg, var(--bg) 0%, var(--bg-2) 52%, var(--bg) 100%);
+}
+
+.mesh::after {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(28rem 28rem at 30% 40%, rgba(106,161,255,.13), transparent 60%),
+    radial-gradient(24rem 24rem at 70% 60%, rgba(45,212,191,.12), transparent 60%);
+  animation: drift 26s var(--ease) infinite alternate;
+}
+
+@keyframes drift {
+  0%   { transform: translate3d(-4%, -3%, 0) scale(1); }
+  50%  { transform: translate3d(3%, 4%, 0) scale(1.08); }
+  100% { transform: translate3d(5%, -2%, 0) scale(1.03); }
+}
+
+/* Faint grid overlay for depth reference. */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .35;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 78%);
+}
+
+/* ─── Layout ───────────────────────────────────────────────────────────── */
+.wrap {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+}
+
+.wrap-narrow { max-width: 760px; }
+
+.stack   { display: flex; flex-direction: column; }
+.stack-2 { gap: .5rem; }  .stack-3 { gap: .75rem; }
+.stack-4 { gap: 1rem; }   .stack-6 { gap: 1.5rem; }
+.stack-8 { gap: 2rem; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.row-between { justify-content: space-between; }
+.push { margin-left: auto; }
+
+.grid { display: grid; gap: 1.25rem; }
+.grid-stats { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.grid-docs  { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+
+.muted   { color: var(--text-dim); }
+.faint   { color: var(--text-faint); }
+.tiny    { font-size: .78rem; }
+.small   { font-size: .87rem; }
+.center  { text-align: center; }
+.nowrap  { white-space: nowrap; }
+.upper   { text-transform: uppercase; letter-spacing: .1em; }
+
+/* ─── Reduced motion ──────────────────────────────────────────────────── */
+/* Honour the OS setting: kill drifting, tilting and looping animation, keep
+   the layout and colour system exactly as-is. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .mesh::after { animation: none; }
+  .card3d { transform: none !important; }
+}
+
+/* ============================================================================
+   JAYPEE MULTI-CAMPUS THEMES (JIIT, JUIT, JUET)
+   ============================================================================ */
+/* Default / JIIT Noida: Cyber Tech Blue */
+[data-campus="jiit"], body:not([data-campus]) {
+  --campus-primary: #2f6bed;
+  --campus-glow: rgba(47, 107, 237, 0.4);
+  --campus-accent: #60a5fa;
+  --campus-crest: #1d4ed8;
+}
+
+/* JUIT Waknaghat: Himalayan Pine / Emerald Green */
+[data-campus="juit"] {
+  --indigo:        #059669;   /* JUIT Pine Green */
+  --indigo-lit:    #34d399;   /* Pine on-dark */
+  --purple:        #0d9488;   /* Teal secondary */
+  --purple-lit:    #2dd4bf;
+  --campus-primary: #059669;
+  --campus-glow: rgba(5, 150, 105, 0.45);
+  --campus-accent: #10b981;
+  --campus-crest: #047857;
+  --sh-glow: 0 0 0 1px rgba(52, 211, 153, .35), 0 12px 40px rgba(5, 150, 105, .35);
+}
+
+/* JUET Guna: Royal Amber / Golden Sun */
+[data-campus="juet"] {
+  --indigo:        #d97706;   /* JUET Amber Gold */
+  --indigo-lit:    #fbbf24;   /* Amber on-dark */
+  --purple:        #b45309;   /* Deep Bronze */
+  --purple-lit:    #f59e0b;
+  --campus-primary: #d97706;
+  --campus-glow: rgba(217, 119, 6, 0.45);
+  --campus-accent: #f59e0b;
+  --campus-crest: #b45309;
+  --sh-glow: 0 0 0 1px rgba(251, 191, 36, .35), 0 12px 40px rgba(217, 119, 6, .35);
+}
+
+/* ============================================================================
+   3D TILT CARDS & PARALLAX GLOW
+   ============================================================================ */
+.tilt-card-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.tilt-card-3d:hover {
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), var(--sh-glow);
+}
+
+.tilt-card-3d .tilt-inner {
+  transform: translateZ(24px);
+  transform-style: preserve-3d;
+}
+
+.tilt-glare {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.18) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: overlay;
+}
+
+.tilt-card-3d:hover .tilt-glare {
+  opacity: 1;
+}
+
+/* ============================================================================
+   3D HOLOGRAPHIC SECURITY SEAL
+   ============================================================================ */
+.holo-seal-3d {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from var(--holo-angle, 0deg),
+    #ff0077, #ffdd00, #00ff88, #00eeff, #9900ff, #ff0077
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.4);
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+  cursor: pointer;
+  animation: holoRotate 12s linear infinite;
+}
+
+@keyframes holoRotate {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.holo-seal-inner {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: rgba(12, 16, 36, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1.5px dashed rgba(255, 255, 255, 0.4);
+  color: #fff;
+  transform: translateZ(10px);
+}
+
+.holo-seal-inner b {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.holo-seal-inner span {
+  font-size: 0.55rem;
+  opacity: 0.8;
+}
+
+/* ============================================================================
+   3D INTERACTIVE BLOCKCHAIN VISUALIZER
+   ============================================================================ */
+.blockchain-3d-wrapper {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(30, 41, 75, 0.4) 0%, rgba(8, 8, 26, 0.95) 100%);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-2);
+}
+
+.blockchain-3d-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.blockchain-3d-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--border-lit);
+  backdrop-filter: blur(8px);
+  padding: 0.35rem 0.85rem;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.blockchain-3d-hint {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ============================================================================
+   MINIMALIST HIGH-TECH NEON BORDERS & GLOWS
+   ============================================================================ */
+.card, .panel, .stat, .doc {
+  border: 1px solid var(--border);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+  backdrop-filter: blur(12px);
+}
+
+.card:hover, .panel:hover, .stat:hover, .doc:hover {
+  border-color: var(--campus-accent, #00f2fe);
+  box-shadow: 0 0 20px -2px var(--campus-glow, rgba(47, 107, 237, 0.4)), var(--sh-2);
+}
+
+/* Crisp high-tech input micro-glow */
+.input, .select, textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.input:focus, .select:focus, textarea:focus {
+  border-color: var(--campus-accent, #00f2fe) !important;
+  box-shadow: 0 0 16px -2px var(--campus-glow, rgba(0, 242, 254, 0.45)), inset 0 0 8px rgba(255,255,255,0.05) !important;
+  outline: none !important;
+}
+
+/* ============================================================================
+   INTERACTIVE 3D TILT PROFILE BADGE
+   ============================================================================ */
+.badge-3d-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 99px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid var(--campus-accent, rgba(47,107,237,0.5));
+  box-shadow: 0 4px 15px rgba(0,0,0,0.35), inset 0 0 10px var(--campus-glow, rgba(47,107,237,0.25));
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.badge-3d-profile:hover {
+  transform: perspective(600px) rotateX(-5deg) rotateY(10deg) translateZ(4px);
+  box-shadow: 0 8px 25px var(--campus-glow, rgba(0,242,254,0.4)), inset 0 0 15px rgba(255,255,255,0.2);
+  border-color: #fff;
+}
+
+.badge-3d-profile .profile-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--campus-accent, #00f2fe);
+  box-shadow: 0 0 8px var(--campus-accent, #00f2fe);
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ============================================================================
+   FULL-SCREEN BACKGROUND CRYPTOGRAPHIC MATRIX RAIN
+   ============================================================================ */
+.matrix-rain-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.42;
+  mix-blend-mode: screen;
+}
+
+/* ============================================================================
+   3D BLOCKCHAIN HERO CANVAS (SIDE-ALIGNED)
+   ============================================================================ */
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   HERO FROSTED GLASS CARD & JAYPEE BRANDING
+   ============================================================================ */
+.hero-glass-card {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  margin: 1.5rem 0;
+  padding: 2.25rem;
+  background: rgba(10, 16, 32, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 35px var(--campus-glow, rgba(47, 107, 237, 0.2));
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-glass-card:hover {
+  border-color: var(--campus-accent, rgba(96, 165, 250, 0.6));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 45px var(--campus-glow, rgba(47, 107, 237, 0.35));
+}
+
+.hero-campus-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(47, 107, 237, 0.15);
+  border: 1px solid var(--campus-accent, rgba(47, 107, 237, 0.4));
+  border-radius: 99px;
+  padding: 4px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--campus-accent, #60a5fa);
+  margin-bottom: 1.25rem;
+}
+

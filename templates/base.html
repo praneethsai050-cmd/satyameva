@@ -1,0 +1,194 @@
+{# ===========================================================================
+   base.html — application shell
+   ===========================================================================
+   Provides the animated canvas, the sticky nav, the toast host and the asset
+   includes. Pages override `content`; `login.html` overrides `chrome` to drop
+   the nav entirely.
+   ======================================================================== #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="{{ brand }} — {{ tagline }}. Blockchain-verified academic credentials.">
+  <title>{% block title %}{{ brand }}{% endblock %} · {{ brand }}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  {# Favicon & App Icons: Cyber Holographic Shield #}
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='img/icon-192.png') }}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='img/icon-512.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+
+  {# PWA Manifest and mobile icons #}
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#08081a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  {% block head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}" data-campus="{{ current_campus }}">
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+  <canvas id="fullscreen-matrix-rain" class="matrix-rain-bg" data-matrix-rain aria-hidden="true"></canvas>
+
+  {% block chrome %}
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-cube" aria-hidden="true"><i></i></span>
+        <span>
+          <span class="brand-name">{{ brand }} <span class="badge" style="font-size:.65rem;vertical-align:middle;padding:.15rem .45rem;border-radius:99px;border:1px solid var(--border)">{{ campus_code }}</span></span>
+          <span class="brand-sub">{{ campus_name }} · {{ tagline }}</span>
+        </span>
+      </a>
+
+      <button class="nav-toggle push" type="button" data-nav-toggle
+              aria-expanded="false" aria-label="Toggle navigation">☰</button>
+
+        {% if current_user.is_authenticated and current_user.is_student %}
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'student.dashboard' }}"
+             href="{{ url_for('student.dashboard') }}">Dashboard</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint in ('student.all_history', 'student.document_history') }}"
+             href="{{ url_for('student.all_history') }}">History</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'student.notifications' }}"
+             href="{{ url_for('student.notifications') }}">
+            Alerts
+            {% if alert_count %}<span class="nav-count">{{ alert_count }}</span>{% endif %}
+          </a>
+        {% elif current_user.is_authenticated and current_user.is_issuer %}
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'issuer.dashboard' }}"
+             href="{{ url_for('issuer.dashboard') }}">Dashboard</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'issuer.issue' }}"
+             href="{{ url_for('issuer.issue') }}">Issue Document</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'issuer.bulk_issue' }}"
+             href="{{ url_for('issuer.bulk_issue') }}">Bulk Issue</a>
+        {% elif current_user.is_authenticated and current_user.is_verifier %}
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'verifier.dashboard' }}"
+             href="{{ url_for('verifier.dashboard') }}">Scanner &amp; Verify</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'verifier.batch_verify' }}"
+             href="{{ url_for('verifier.batch_verify') }}">Batch Verify</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint in ('verifier.history', 'verifier.audit_report') }}"
+             href="{{ url_for('verifier.history') }}">Verification History</a>
+        {% elif current_user.is_authenticated and current_user.is_admin %}
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'admin.dashboard' }}"
+             href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'admin.users' }}"
+             href="{{ url_for('admin.users') }}">Users</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'admin.institutions' }}"
+             href="{{ url_for('admin.institutions') }}">Institutions</a>
+          <a class="nav-link {{ 'is-active' if request.endpoint == 'admin.documents' }}"
+             href="{{ url_for('admin.documents') }}">Documents</a>
+        {% endif %}
+        <a class="nav-link {{ 'is-active' if request.endpoint == 'public.verify' }}"
+           href="{{ url_for('public.verify') }}">Public Verify</a>
+      </nav>
+
+      {% if current_user.is_authenticated %}
+        <div class="row nav-user">
+          <span class="badge badge-valid" id="network-pill" style="font-size:.7rem; padding:.2rem .55rem" title="Connected to blockchain network">
+            <span aria-hidden="true">●</span> Online
+          </span>
+
+          <span class="session-pill" data-session="{{ session_remaining }}"
+                title="Sessions end after 5 minutes of inactivity">
+            <span class="session-dot" aria-hidden="true"></span>
+            <span data-session-label>5:00</span>
+          </span>
+
+          <div class="badge-3d-profile" title="Verified {{ current_user.role|capitalize }} · {{ campus_name }}">
+            <span class="profile-dot" aria-hidden="true"></span>
+            <span class="avatar" style="width:24px;height:24px;font-size:.7rem;line-height:24px" aria-hidden="true">{{ current_user.initials }}</span>
+            <span class="stack" style="line-height:1.15">
+              <b class="tiny nowrap">{{ current_user.display_name }}</b>
+              <span class="tiny faint" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.05em">{{ current_user.role }} · {{ campus_code }}</span>
+            </span>
+          </div>
+
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('auth.logout') }}">Sign out</a>
+        </div>
+      {% else %}
+        <a class="btn btn-primary btn-sm" href="{{ url_for('auth.login') }}">Sign in</a>
+      {% endif %}
+    </div>
+  </header>
+  {% endblock %}
+
+  <main {% block main_attrs %}class="wrap" style="padding-top:2rem"{% endblock %}>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <footer class="foot">
+    <div class="wrap row row-between">
+      <span>© {{ current_year }} {{ brand }} · {{ tagline }}</span>
+      <span class="tiny faint">
+        SHA-256 · PBKDF2 · per-document salting · 60-second dynamic QR
+      </span>
+    </div>
+  </footer>
+  {% endblock %}
+
+  {# Flash messages are seeded into the DOM and replayed as toasts by app.js,
+     so server-side and client-side notifications share one presentation. #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <span hidden data-flash="{{ message }}"
+            data-flash-kind="{{ {'error':'error','danger':'error','warning':'warning',
+                                 'success':'success'}.get(category, 'info') }}"></span>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="toasts" data-toasts aria-live="polite" aria-atomic="false"></div>
+
+  {# Three.js is decoration. hero3d.js checks for window.THREE and leaves the
+     CSS-3D fallback in place if the CDN is unreachable. #}
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script defer src="{{ url_for('static', filename='js/hero3d.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/ambient3d.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/matrix_rain.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/tilt3d.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/blockchain3d.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  
+  {# PWA Service Worker & Network Status Handler #}
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+          .then(function(reg) { console.log('Satyameva PWA Service Worker registered:', reg.scope); })
+          .catch(function(err) { console.warn('PWA Service Worker note:', err); });
+      });
+    }
+
+    function updateNetworkStatus() {
+      const el = document.getElementById('network-pill');
+      if (!el) return;
+      if (navigator.onLine) {
+        el.className = 'badge badge-valid';
+        el.innerHTML = '<span aria-hidden="true">●</span> Online';
+        el.title = 'Connected to Satyameva blockchain network';
+      } else {
+        el.className = 'badge badge-revoked';
+        el.innerHTML = '<span aria-hidden="true">○</span> Offline (PWA)';
+        el.title = 'Offline mode active. Cached records accessible.';
+      }
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    document.addEventListener('DOMContentLoaded', updateNetworkStatus);
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Verification History · Verifier Portal{% endblock %}
+
+{% block content %}
+<div class="stack stack-6">
+
+  <!-- ══ Heading ═════════════════════════════════════════════════════════ -->
+  <div class="stack stack-3">
+    <a class="small faint" href="{{ url_for('verifier.dashboard') }}">← Back to scanner</a>
+
+    <div class="row row-between" style="align-items:flex-start; gap:1rem">
+      <div>
+        <span class="hero-kicker">📜 Audit Trail</span>
+        <h1 style="margin-top:.6rem">Your Verification History</h1>
+        <p class="muted" style="margin-top:.4rem; max-width:62ch">
+          A complete audit log of all credentials verified by {{ current_user.organization or current_user.display_name }},
+          including timestamps, cryptographic hashes, and verdicts.
+        </p>
+      </div>
+
+      <div class="row" style="gap:.5rem">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('verifier.export_history_csv') }}">
+          <span aria-hidden="true">📥</span> Export CSV
+        </a>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('verifier.audit_report') }}">
+          <span aria-hidden="true">📜</span> Audit Statement
+        </a>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('verifier.dashboard') }}">
+          <span aria-hidden="true">＋</span> Verify Credential
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Summary counts ══════════════════════════════════════════════════ -->
+  <div class="grid grid-stats scene" data-stagger>
+    {% for label, value, icon, tint in [
+      ('Total Checks', stats.total, '🔍', 'total'),
+      ('Authentic', stats.valid, '✅', 'valid'),
+      ('Expired', stats.expired, '⌛', 'expiring'),
+      ('Tampered / Flagged', stats.tampered + stats.not_found, '🚫', 'revoked'),
+    ] %}
+      <div class="stat card3d" data-tilt="6" data-tilt-lift="10">
+        <span class="stat-glow" aria-hidden="true"></span>
+        <span class="card3d-glare" aria-hidden="true"></span>
+        <div class="stat-head depth-1">
+          <span class="stat-label">{{ label }}</span>
+          <span class="stat-icon" aria-hidden="true">{{ icon }}</span>
+        </div>
+        <div class="stat-value depth-2">{{ value }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ══ Filters & Search ════════════════════════════════════════════════ -->
+  <section class="panel panel-tight">
+    <form class="filters" method="get" action="{{ url_for('verifier.history') }}" role="search">
+      <label class="field">
+        <span class="field-icon" aria-hidden="true">🔎</span>
+        <span class="sr-only">Search checks</span>
+        <input class="input input-search" type="search" name="q" value="{{ search }}"
+               placeholder="Search by student name, roll number, title or hash…">
+      </label>
+
+      <label class="field">
+        <span class="sr-only">Filter by verdict</span>
+        <select class="select" name="result">
+          <option value="">All verdicts</option>
+          {% for code, label in [('VALID','Authentic (Valid)'), ('EXPIRED','Expired'),
+                                 ('REVOKED','Revoked'), ('TAMPERED','Tampered'),
+                                 ('NOT_FOUND','Not Found')] %}
+            <option value="{{ code }}" {{ 'selected' if result_filter == code }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <noscript><button class="btn btn-primary btn-sm" type="submit">Apply</button></noscript>
+
+      {% if search or result_filter %}
+        <a class="btn btn-ghost btn-sm push" href="{{ url_for('verifier.history') }}">
+          Clear filters
+        </a>
+      {% endif %}
+    </form>
+  </section>
+
+  <!-- ══ Logs List ═══════════════════════════════════════════════════════ -->
+  {% if logs %}
+    <div class="panel">
+      <div class="timeline">
+        {% for log in logs %}
+          <div class="tl-item">
+            <span class="tl-dot tl-{{ log.result_class }}" aria-hidden="true"></span>
+
+            <div class="stack stack-2" style="flex:1">
+              <div class="row row-between" style="align-items:flex-start; gap:.75rem">
+                <div class="stack" style="gap:2px">
+                  <b style="font-size:1rem">
+                    {% if log.doc %}
+                      {{ log.doc.type_icon }} {{ log.doc.title }}
+                    {% else %}
+                      Unanchored / Invalid Hash
+                    {% endif %}
+                  </b>
+                  {% if log.doc and log.doc.student %}
+                    <span class="small">
+                      Holder: <b>{{ log.doc.student.full_name }}</b> (Roll {{ log.doc.student.roll_number }})
+                      {% if log.doc.issuer_name %} · Issued by {{ log.doc.issuer_name }}{% endif %}
+                    </span>
+                  {% endif %}
+                </div>
+
+                <span class="badge badge-{{ log.result_class }} nowrap">
+                  {{ log.result_icon }} {{ log.result.replace('_', ' ') }}
+                </span>
+              </div>
+
+              <div class="row row-between tiny faint" style="margin-top:.35rem">
+                <span class="mono">Hash: {{ (log.queried_hash or '—')|short_hash }}</span>
+                <span>
+                  Method: <span class="badge badge-neutral" style="font-size:.65rem">{{ log.method }}</span> ·
+                  {{ log.timestamp|datetime }}
+                </span>
+              </div>
+
+              {% if log.queried_hash %}
+                <div class="row" style="margin-top:.4rem">
+                  <a class="btn btn-ghost btn-sm" href="{{ url_for('verifier.verify_hash_result', doc_hash=log.queried_hash) }}">
+                    Re-verify →
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="panel empty">
+      <div class="empty-art" aria-hidden="true">📭</div>
+      {% if search or result_filter %}
+        <h3>No verifications match those criteria</h3>
+        <p class="muted">Try clearing the search or changing the filter.</p>
+        <a class="btn btn-primary" href="{{ url_for('verifier.history') }}">Clear filters</a>
+      {% else %}
+        <h3>No verification history yet</h3>
+        <p class="muted">
+          Every QR scan or manual hash check performed will appear here in your audit log.
+        </p>
+        <a class="btn btn-primary" href="{{ url_for('verifier.dashboard') }}">
+          Go to Scanner
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

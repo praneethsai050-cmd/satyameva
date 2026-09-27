@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Sign in{% endblock %}
+
+{# No nav, no footer: the login page is a single focused surface. #}
+{% block chrome %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block main_attrs %}class="login-shell"{% endblock %}
+
+{% block content %}
+  <!-- ── 3D blockchain visual ─────────────────────────────────────────── -->
+  <section class="login-visual" style="position:relative;overflow:hidden">
+    <!-- Background 3D blockchain cube chain -->
+    <canvas class="hero-canvas" data-hero3d aria-hidden="true"></canvas>
+
+    <div class="hero-glass-card">
+      <a class="brand" href="{{ url_for('public.verify') }}" style="margin-bottom:1.5rem">
+        <span class="brand-cube" aria-hidden="true"><i></i></span>
+        <span>
+          <span class="brand-name" style="font-size:1.4rem">{{ brand }}</span>
+          <span class="brand-sub">{{ tagline }}</span>
+        </span>
+      </a>
+
+      <div class="hero-campus-pill">
+        <span>🎓 Jaypee Education System</span>
+      </div>
+
+      <h1 style="margin-top:0.25rem; max-width:18ch; font-size:2.2rem; line-height:1.2; font-weight:800; letter-spacing:-0.5px">
+        Jaypee Credentials, <em style="color:#60a5fa; font-style:normal; text-shadow:0 0 20px rgba(96,165,250,0.5)">provably</em> authentic.
+      </h1>
+
+      <p class="hero-lead" style="margin-top:1rem; font-size:0.96rem; line-height:1.65; color:rgba(226, 232, 240, 0.9)">
+        Every degree, diploma, and certificate across <strong>JIIT Noida</strong>, <strong>JUIT Waknaghat</strong>, and <strong>JUET Guna</strong> is anchored to an immutable cryptographic ledger. Share a 60-second QR code and an employer verifies it in seconds.
+      </p>
+
+      <!-- CSS-3D fallback chain: stays visible if the Three.js CDN is blocked. -->
+      <div class="chain-fallback" aria-hidden="true" style="margin-top:1.5rem">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+
+      <div class="row" style="margin-top:1.75rem; gap:1.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.25rem">
+        <div class="stack">
+          <b style="font-size:1.35rem; color:#fff">3 Campuses</b>
+          <span class="tiny faint upper" style="color:rgba(148, 163, 184, 0.9)">JIIT · JUIT · JUET</span>
+        </div>
+        <div class="stack">
+          <b style="font-size:1.35rem; color:#60a5fa">SHA-256</b>
+          <span class="tiny faint upper" style="color:rgba(148, 163, 184, 0.9)">Tamper-Proof</span>
+        </div>
+        <div class="stack">
+          <b style="font-size:1.35rem; color:#34d399">&lt; 5s</b>
+          <span class="tiny faint upper" style="color:rgba(148, 163, 184, 0.9)">Live Verify</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Sign-in card ─────────────────────────────────────────────────── -->
+  <section class="login-card" style="justify-self:center">
+    <div class="stack stack-6">
+      <div>
+        <span class="hero-kicker">🔐 Secure sign-in</span>
+        <h2 style="margin-top:.75rem">Welcome back</h2>
+        <p class="muted small" style="margin:.4rem 0 0">
+          Sessions end automatically after 5 minutes of inactivity.
+        </p>
+      </div>
+
+      {# `next` travels in the querystring — auth_routes reads it from
+         request.args and rejects anything that is not a relative path. #}
+      <form method="post"
+            action="{{ url_for('auth.login', next=request.args.get('next')) }}"
+            class="stack stack-4" data-login-form novalidate>
+        <div>
+          <label class="field-label" for="identifier">Username or email</label>
+          <input class="input" id="identifier" name="identifier" type="text"
+                 autocomplete="username" required autofocus
+                 placeholder="admin, roll number, or email">
+        </div>
+
+        <div>
+          <label class="field-label" for="password">Password</label>
+          <input class="input" id="password" name="password" type="password"
+                 autocomplete="current-password" required placeholder="••••••••••">
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit">
+          Sign in <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      {# ── OAuth Social Sign-In ── #}
+      <div style="display:flex;align-items:center;gap:.75rem;margin:.25rem 0">
+        <hr style="flex:1;border:none;border-top:1px solid rgba(255,255,255,.12)">
+        <span class="tiny faint">or continue with</span>
+        <hr style="flex:1;border:none;border-top:1px solid rgba(255,255,255,.12)">
+      </div>
+
+      <div class="row" style="gap:.75rem">
+        <a href="{{ url_for('oauth.google_login') }}" class="btn btn-ghost btn-md btn-block"
+           style="width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.03);padding:.65rem">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          <span style="font-weight:600">Continue with Google</span>
+        </a>
+      </div>
+
+      <div class="row row-between tiny faint">
+        <span>New to Satyameva?</span>
+        <a href="{{ url_for('auth.register') }}">Create an account →</a>
+      </div>
+
+      <div class="row row-between tiny faint" style="margin-top:0.5rem">
+        <span>Verifying someone else's certificate?</span>
+        <a href="{{ url_for('public.verify') }}">Public verifier →</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}
