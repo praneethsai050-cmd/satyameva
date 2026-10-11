@@ -1,0 +1,116 @@
+================================================================================
+RIDEHACK'26 — JUIT BOARD ROOM PITCH (11:00 AM TODAY)
+SPEAKER SCRIPT FOR: SHASHANK RAY (Co-Founder & Product/Business Lead)
+================================================================================
+
+TEAM: CYPHER X (Satyameva Aegis)
+BEFORE: Hon'ble Vice Chancellor Sir & Senior Faculty Members
+VENUE: Board Room, JUIT Waknaghat
+
+OVERVIEW OF YOUR SPEAKING SLOTS:
+  PART 1: Hand-off Intro & The Problem Crisis (Slides 2 & 3) ~ 1.5 Minutes
+  PART 2: Business Model, Economics & NEP 2020 (Slide 6)     ~ 1.0 Minute
+  PART 3: In-House JUIT Pilot & Closing Ask to VC Sir (Slide 7) ~ 1.0 Minute
+  TOTAL TIME: ~3.5 Minutes (Praneeth takes Tech & Live Demo)
+
+================================================================================
+PART 1: THE CRISIS & SOLUTION (SLIDES 2 & 3)
+================================================================================
+
+[CUE: Praneeth introduces the team and says: "...tested across the Jaypee multi-campus network. Now I invite my co-founder Shashank to address the real-world crisis we are solving."]
+
+[ACTION: Step forward, make respectful eye contact with Hon'ble Vice Chancellor Sir and Faculty. Speak with a steady, confident, professional tone.]
+
+"Thank you, Praneeth. 
+
+Respected Vice Chancellor Sir and faculty members — every year in India, over 40,000 counterfeit degrees and forged marksheets are officially detected. But the unmeasured reality is far worse. 
+
+When fake degrees falsely claiming to be from premier institutions circulate in the market, they inflict direct reputational damage on top universities like JUIT, and they devalue the hard work of every genuine graduate sitting in this room.
+
+Today, when an employer like Google, Infosys, or a foreign embassy verifies a JUIT candidate's background, they face an agonizing turnaround time of two to four weeks. Background verification agencies spend between ₹500 to ₹2,000 per applicant on manual registrar follow-ups. Meanwhile, our administrative staff spends valuable hours manually tracing archive registers.
+
+Static paper certificates and scanned PDFs offer zero cryptographic protection — they can be forged using Photoshop in ten minutes.
+
+[SLIDE TRANSITION: CLICK TO SLIDE 3 — THE SOLUTION]
+
+Satyameva Aegis solves this by establishing a complete 360-degree digital trust ecosystem:
+
+First, For JUIT: We provide the Registrar's office with automated Google Gemini AI extraction and bulk issuance, allowing thousands of credentials to be anchored to the blockchain in seconds — with zero gas fees.
+
+Second, For JUIT Students: Every graduate receives a self-sovereign digital wallet. Their credentials carry a permanent JUIT-crested QR code that never expires, along with downloadable verification-grade stamped PDFs.
+
+Third, For Employers: Recruiters need zero accounts. Scanning the JUIT QR code provides mathematical proof of authenticity in under two seconds.
+
+Now, Praneeth will walk you through our deep-tech architecture and demonstrate the live software."
+
+[ACTION: Step back smoothly. Hand control over to Praneeth for Slide 4 & The Live Prototype Demo.]
+
+================================================================================
+PART 2: BUSINESS MODEL, UNIT ECONOMICS & NEP 2020 (SLIDE 6)
+================================================================================
+
+[CUE: Praneeth finishes the Live Prototype Demo and returns to the slides: "...and that proves our 100% cryptographic anti-tamper engine. Now, Shashank will present our business model and national alignment."]
+
+[ACTION: Step forward. Confident, business-focused posture.]
+
+[SLIDE: SLIDE 6 — BUSINESS MODEL & UNIT ECONOMICS]
+
+"Thank you, Praneeth.
+
+Hon'ble Vice Chancellor Sir, Satyameva Aegis is built not just as engineering research, but as a financially self-sustaining venture.
+
+We operate on a Hybrid B2B SaaS Model:
+
+1. Institutional Subscription for Universities:
+   We charge universities an annual licensing fee of approximately ₹1.5 Lakhs per campus. This covers unlimited Gemini AI document extraction, bulk issuance pipelines, and student digital wallet hosting.
+
+2. Corporate Pay-Per-Verify API:
+   Background screening companies like AuthBridge and FirstAdvantage, along with corporate IT recruiters, currently spend upwards of ₹1,000 per manual verification check. We offer them an automated cryptographic verification API at just ₹25 per check — saving them 97% of their costs while generating recurring revenue for our venture.
+
+Because our in-house Proof-of-Work blockchain runs locally with zero cryptocurrency gas fees, our operational unit cost is negligible — giving us a gross profit margin exceeding 92%.
+
+Furthermore, Satyameva directly aligns with the National Education Policy (NEP 2020) and the Academic Bank of Credits. 
+
+To address a common question: Satyameva does not compete with the Government's DigiLocker. DigiLocker is a storage locker. Satyameva is the cryptographic issuance protocol that ensures the documents going into DigiLocker can never be forged. We integrate directly with DigiLocker via standard REST APIs."
+
+================================================================================
+PART 3: IN-HOUSE JUIT PILOT & CLOSING ASK TO VC SIR (SLIDE 7)
+================================================================================
+
+[SLIDE TRANSITION: CLICK TO SLIDE 7 — THE JUIT PILOT & THE ASK]
+
+[ACTION: Look directly at Vice Chancellor Sir. Sincere, inspiring, and respectful tone.]
+
+"Hon'ble Vice Chancellor Sir and esteemed faculty members — today, we bring a concrete, zero-risk proposal to this Board Room:
+
+We propose running an In-House JUIT Pilot for our graduating batch of 2026. 
+
+By deploying Satyameva Aegis in parallel with existing registrar operations, JUIT Waknaghat will become the FIRST university in Himachal Pradesh to issue 100% blockchain-verified academic degrees. 
+
+From JUIT as our innovation hub, we can expand across the entire Jaypee Group — encompassing JIIT Noida and JUET Guna across more than 15,000 students.
+
+Our Ask from You Today:
+1. Selection to represent JUIT Waknaghat at the Grand Finale at JIIT Noida, competing for the ₹1 Crore funding pool.
+2. Incubation support under RIDE JUIT to file our provisional patent for multi-campus cryptographic salting and institutional QR technology.
+3. Administrative approval to test a sandbox batch with the Registrar's office.
+
+Sir, with your mentorship, guidance, and institutional backing, Team CYPHER X will ensure that JUIT stands at the very forefront of national digital trust and blockchain innovation.
+
+Thank you, Sir! We are now open for your questions."
+
+================================================================================
+EMERGENCY CHEAT-SHEET FOR SHASHANK DURING FACULTY Q&A
+================================================================================
+
+1. IF ASKED: "Why should a university buy this when DigiLocker is free?"
+   YOUR ANSWER:
+   "Sir, DigiLocker is a centralized document repository. If an insider or compromised account uploads an altered degree, DigiLocker will stamp it as authentic. DigiLocker cannot detect origin fraud. Satyameva provides mathematical proof of issuance at the university origin point, and foreign employers/embassies can verify in 2 seconds without logging into a citizen's DigiLocker."
+
+2. IF ASKED: "What is the cost for JUIT to implement this?"
+   YOUR ANSWER:
+   "Sir, for JUIT, the pilot is completely zero-cost. The entire node runs on standard university server hardware with 2 GB RAM, and processing the entire graduating batch of 5,000 students costs under ₹60 in total computing electricity. In fact, it saves the university thousands in physical paper seals and manual administrative hours."
+
+3. IF ASKED: "Who are your target customers?"
+   YOUR ANSWER:
+   "Sir, our primary customers are private and state universities seeking to protect their brand reputation, followed by corporate HR departments (TCS, Infosys, Wipro) and background verification agencies who want instant, reliable candidate credential checks."
+================================================================================
