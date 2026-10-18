@@ -345,9 +345,6 @@ satyameva/
 Have questions, collaboration inquiries, or investment discussions? Reach out directly:
 
 <p align="center">
-  <a href="https://wa.me/918777679256?text=Hi%20Praneeth%2C%20I%20reviewed%20Satyameva%20Aegis%20and%20wanted%20to%20connect!">
-    <img src="https://img.shields.io/badge/WhatsApp-+91_87776_79256-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
-  </a>
   <a href="https://www.linkedin.com/in/a-praneeth-sai-089023289/">
     <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
   </a>
