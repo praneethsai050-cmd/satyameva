@@ -4,8 +4,12 @@ from app import create_app
 from models.document import Doc
 from models.user import User
 
+if sys.platform == 'win32' and hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 app = create_app()
 app.config['WTF_CSRF_ENABLED'] = False
+app.config['MAIL_SUPPRESS_SEND'] = True
 fails = []
 
 def check(label, resp, expect=200):

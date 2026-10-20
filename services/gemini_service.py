@@ -2,7 +2,7 @@
 Gemini AI service for extracting document metadata from uploaded files.
 
 Uses the official google-genai SDK with multimodal input to reliably extract
-student name, roll number, document type, and title from uploaded PDFs and images.
+student name, roll number, document type, date of birth (DOB), and title from uploaded PDFs and images.
 """
 from __future__ import annotations
 
@@ -30,9 +30,10 @@ Extract the following fields from the provided document image or PDF:
 - doc_type: one of DEGREE, MARKSHEET, TC, MIGRATION, BONAFIDE, or INTERNSHIP
 - title: exact credential title (e.g. "Bachelor of Technology in Computer Science")
 - institution: name of the issuing university or institute
+- dob: date of birth of the student in DDMMYYYY format (e.g. 01011999). If not explicitly found, use empty string ""
 
 Respond ONLY with a valid JSON object in this exact format:
-{"student_name": "...", "roll_number": "...", "student_email": "...", "doc_type": "...", "title": "...", "institution": "..."}
+{"student_name": "...", "roll_number": "...", "student_email": "...", "doc_type": "...", "title": "...", "institution": "...", "dob": "..."}
 
 If a field cannot be determined, use an empty string "" for it.
 Do not output any markdown or explanation outside the JSON."""
@@ -56,7 +57,7 @@ def extract_document_fields(
     Send the uploaded document to Gemini and return extracted fields.
 
     Returns:
-        dict with keys: student_name, roll_number, doc_type, title, institution.
+        dict with keys: student_name, roll_number, student_email, doc_type, title, institution, dob.
         On any failure returns an empty dict so user can enter data manually.
     """
     if not api_key:
@@ -70,7 +71,7 @@ def extract_document_fields(
         client = genai.Client(api_key=api_key)
 
         part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
-        prompt = "Extract student_name, roll_number, doc_type, title, and institution from this document."
+        prompt = "Extract student_name, roll_number, doc_type, title, institution, and dob (as DDMMYYYY) from this document."
 
         # Model cascade: try fast & responsive models in order
         candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-latest']
@@ -114,6 +115,7 @@ def extract_document_fields(
             'doc_type': _match_doc_type(str(data.get('doc_type') or '')),
             'title': str(data.get('title') or '').strip(),
             'institution': str(data.get('institution') or '').strip(),
+            'dob': str(data.get('dob') or '').strip(),
         }
 
     except Exception as exc:

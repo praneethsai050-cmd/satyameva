@@ -15,13 +15,14 @@ from flask_login import current_user, logout_user
 from config import BASE_DIR, config_by_name
 from extensions import db, login_manager, mail, utcnow
 
-#: Endpoints reachable without a live session (login page, public verifier, register, static, blockchain consensus, offline, oauth).
+#: Endpoints reachable without a live session (login page, public verifier, register, static, blockchain consensus, offline, oauth, pwa).
 PUBLIC_ENDPOINTS = {
-    'auth.login', 'auth.register', 'public.verify', 'public.verify_hash', 'public.offline', 'static', 'index',
+    'auth.login', 'auth.register', 'auth.verify_email', 'public.verify', 'public.verify_hash', 'public.offline', 'static', 'index',
     'blockchain_api.get_chain', 'blockchain_api.list_nodes', 'blockchain_api.consensus_resolve',
     'blockchain_api.register_nodes',
     'oauth.google_login', 'oauth.google_callback',
     'oauth.microsoft_login', 'oauth.microsoft_callback',
+    'service_worker', 'manifest',
 }
 
 
@@ -40,7 +41,7 @@ def create_app(config_name: str | None = None) -> Flask:
 
     with app.app_context():
         from models import (  # noqa: F401
-            Block, Doc, Document, FraudReport, Institution, Notification, Student, User,
+            Block, CredentialRequest, Doc, Document, FraudReport, Institution, Notification, Student, User,
             VerificationLog,
         )
         db.create_all()
@@ -58,6 +59,19 @@ def create_app(config_name: str | None = None) -> Flask:
         if current_user.is_authenticated:
             return redirect(url_for(current_user.home_endpoint()))
         return redirect(url_for('auth.login'))
+
+    @app.route('/sw.js')
+    def service_worker():
+        from flask import send_from_directory
+        resp = send_from_directory(os.path.join(BASE_DIR, 'static'), 'sw.js', mimetype='application/javascript')
+        resp.headers['Service-Worker-Allowed'] = '/'
+        resp.headers['Cache-Control'] = 'no-cache'
+        return resp
+
+    @app.route('/manifest.json')
+    def manifest():
+        from flask import send_from_directory
+        return send_from_directory(os.path.join(BASE_DIR, 'static'), 'manifest.json', mimetype='application/manifest+json')
 
     return app
 

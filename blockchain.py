@@ -165,22 +165,21 @@ class Blockchain:
             if expected != block.hash:
                 return False, f'Block #{block.index} hash mismatch — data was altered.'
 
+            if position == 0:
+                if block.previous_hash != GENESIS_PREVIOUS_HASH:
+                    return False, 'Genesis block has an unexpected parent.'
+            else:
+                previous = blocks[position - 1]
+                if block.previous_hash != previous.hash:
+                    return False, f'Block #{block.index} does not link to block #{previous.index}.'
+                if block.index != previous.index + 1:
+                    return False, f'Chain has a gap before block #{block.index}.'
+
             # Cryptographic signature check if present
             if getattr(block, 'signature', None) and getattr(block, 'miner_public_key', None):
                 from services.crypto_service import verify_signature
                 if not verify_signature(block.miner_public_key, block.hash, block.signature):
                     return False, f'Block #{block.index} cryptographic signature verification failed.'
-
-            if position == 0:
-                if block.previous_hash != GENESIS_PREVIOUS_HASH:
-                    return False, 'Genesis block has an unexpected parent.'
-                continue
-
-            previous = blocks[position - 1]
-            if block.previous_hash != previous.hash:
-                return False, f'Block #{block.index} does not link to block #{previous.index}.'
-            if block.index != previous.index + 1:
-                return False, f'Chain has a gap before block #{block.index}.'
 
         return True, f'Chain intact — {len(blocks)} blocks verified.'
 

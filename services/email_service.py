@@ -48,12 +48,8 @@ def _send(subject: str, recipients: list, html_template: str,
 
         app = current_app._get_current_object()
 
-        # If testing or suppressed, send immediately without background worker
-        if app.config.get('MAIL_SUPPRESS_SEND', False):
-            try:
-                mail.send(msg)
-            except Exception:
-                pass
+        # If testing or suppressed, return immediately without connecting to SMTP
+        if app.config.get('MAIL_SUPPRESS_SEND', False) or app.testing:
             return True
 
         # Non-blocking async background delivery
@@ -150,3 +146,58 @@ def send_verification_alert_student(doc, student, verifier_label: str, method: s
         brand=current_app.config.get('INSTITUTION_NAME', 'Satyameva'),
     )
 
+
+
+def send_student_verification_email(student, verify_url: str) -> bool:
+    """Send student an email with the verification link."""
+    email = getattr(getattr(student, 'user', None), 'email', None)
+    if not email:
+        return False
+    return _send(
+        subject='Verify your student email — Satyameva',
+        recipients=[email],
+        html_template='email/email_verify_student.html',
+        txt_template='email/email_verify_student.txt',
+        student=student,
+        verify_url=verify_url,
+        brand=current_app.config.get('INSTITUTION_NAME', 'Satyameva'),
+    )
+
+
+def send_student_approved_email(student) -> bool:
+    """Notify student that their account has been approved by the institution."""
+    email = getattr(getattr(student, 'user', None), 'email', None)
+    if not email:
+        return False
+    try:
+        login_url = url_for('auth.login', _external=True)
+    except RuntimeError:
+        login_url = ''
+    return _send(
+        subject='Account Approved: Access your Satyameva Credentials',
+        recipients=[email],
+        html_template='email/student_approved.html',
+        txt_template='email/student_approved.txt',
+        student=student,
+        login_url=login_url,
+        brand=current_app.config.get('INSTITUTION_NAME', 'Satyameva'),
+    )
+
+
+def send_correction_request_notification(req, issuer_email: str) -> bool:
+    """Alert the issuer that a student submitted a correction/re-issuance request."""
+    if not issuer_email:
+        return False
+    try:
+        requests_url = url_for('issuer.requests', _external=True)
+    except RuntimeError:
+        requests_url = ''
+    return _send(
+        subject=f'Credential {req.request_type.title()} Request: {req.student.full_name}',
+        recipients=[issuer_email],
+        html_template='email/correction_request_issuer.html',
+        txt_template='email/correction_request_issuer.txt',
+        req=req,
+        requests_url=requests_url,
+        brand=current_app.config.get('INSTITUTION_NAME', 'Satyameva'),
+    )

@@ -52,7 +52,10 @@ class BaseConfig:
     MAIL_USE_SSL  = os.environ.get('MAIL_USE_SSL',  'false').lower() == 'true'
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')     # None → Flask-Mail skips auth
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@satyameva.edu')
+    MAIL_DEFAULT_SENDER = (
+        os.environ.get('MAIL_SENDER_NAME', 'Satyameva • Jaypee Credentials'),
+        os.environ.get('MAIL_DEFAULT_SENDER', 'satyameva-noreply@jaypeecredentials.in')
+    )
     MAIL_SUPPRESS_SEND  = False                         # set True in tests
 
     # ---- Branding ----

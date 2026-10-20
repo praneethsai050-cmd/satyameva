@@ -139,6 +139,12 @@ def verify_signature(public_key_hex: str, hash_hex: str, signature_hex: str) -> 
         return False
 
 
+# Aliases for convenience
+verify_hash_signature = verify_signature
+sign_hash_message = sign_hash
+
+
+
 # Alias for explicit naming
 verify_hash_signature = verify_signature
 

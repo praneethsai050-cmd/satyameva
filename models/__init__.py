@@ -1,5 +1,6 @@
 """Model package — importing this registers every table with SQLAlchemy."""
 from models.block import Block
+from models.credential_request import CredentialRequest
 from models.document import Doc
 from models.fraud_report import FraudReport
 from models.institution import Institution
@@ -25,4 +26,5 @@ __all__ = [
     'FraudReport',
     'Notification',
     'Institution',
+    'CredentialRequest',
 ]

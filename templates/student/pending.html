@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Account Status · Satyameva{% endblock %}
+
+{% block content %}
+<div class="stack stack-8" style="max-width:640px;margin:3vh auto">
+
+  <div class="card stack" style="gap:1.5rem;padding:2.5rem 2rem;text-align:center;border-color:var(--border)">
+    <div style="font-size:3rem">
+      {% if not student.email_verified %}📧{% else %}⏳{% endif %}
+    </div>
+
+    <div>
+      <h1 style="margin:0;font-size:1.8rem">
+        {% if not student.email_verified %}
+          Email Verification Required
+        {% else %}
+          Institutional Approval Pending
+        {% endif %}
+      </h1>
+      <p class="faint" style="margin:.5rem 0 0;font-size:1rem">
+        Candidate: <b>{{ student.full_name }}</b> (Roll: <code>{{ student.roll_number }}</code>)
+      </p>
+    </div>
+
+    <div class="stack" style="gap:1rem;text-align:left;background:rgba(255,255,255,0.02);padding:1.5rem;border-radius:10px;border:1px solid var(--border)">
+      {# Email status #}
+      <div class="row row-between" style="align-items:center">
+        <div>
+          <b>Email Verification:</b>
+          <div class="faint small">{{ student.user.email if student.user else 'No email on file' }}</div>
+        </div>
+        <div>
+          {% if student.email_verified %}
+            <span class="badge badge-valid">✅ Verified</span>
+          {% else %}
+            <span class="badge badge-revoked">❌ Pending Link</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:0">
+
+      {# Approval status #}
+      <div class="row row-between" style="align-items:center">
+        <div>
+          <b>Institution Access Approval:</b>
+          <div class="faint small">{{ student.institution or 'Your university registrar' }}</div>
+        </div>
+        <div>
+          {% if student.issuer_approved %}
+            <span class="badge badge-valid">✅ Approved</span>
+          {% else %}
+            <span class="badge badge-expiring">⏳ Pending Issuer Review</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="faint small" style="line-height:1.6">
+      {% if not student.email_verified %}
+        Please check your registered inbox for the verification email sent by your university registrar. Click the verification link to proceed.
+      {% else %}
+        Your account is currently queued for institutional registrar sign-off. Once the issuer confirms your enrollment, your blockchain credentials and wallet will unlock automatically.
+      {% endif %}
+    </div>
+
+    <div class="row" style="justify-content:center;gap:1rem;margin-top:.5rem">
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+      <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-sm">Refresh Status</a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

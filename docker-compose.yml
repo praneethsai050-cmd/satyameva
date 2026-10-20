@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build:
@@ -11,43 +9,38 @@ services:
       - "5000:5000"
     environment:
       - SATYAMEVA_ENV=production
-      - DATABASE_URL=postgresql://satyameva_user:satyameva_secure_password@db:5432/satyameva_db
-      - SECRET_KEY=satyameva-production-secret-key-blockchain-2026
-      - POW_DIFFICULTY=4
-      - QR_TOKEN_TTL_SECONDS=60
+      - SECRET_KEY=satyameva-prod-secret-key-blockchain-2026
+      - DATABASE_URL=postgresql://satyameva_user:satyameva_secure_pass@db:5432/satyameva_db
       - TRUST_PROXY_HEADERS=true
+      - POW_DIFFICULTY=4
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USE_TLS=true
+      - MAIL_DEFAULT_SENDER=noreply@satyameva.edu
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - satyameva_instance:/app/instance
-    networks:
-      - satyameva_net
 
   db:
     image: postgres:15-alpine
     container_name: satyameva_db
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=satyameva_user
-      - POSTGRES_PASSWORD=satyameva_secure_password
-      - POSTGRES_DB=satyameva_db
+      POSTGRES_USER: satyameva_user
+      POSTGRES_PASSWORD: satyameva_secure_pass
+      POSTGRES_DB: satyameva_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U satyameva_user -d satyameva_db"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - satyameva_net
 
 volumes:
   postgres_data:
   satyameva_instance:
-
-networks:
-  satyameva_net:
-    driver: bridge

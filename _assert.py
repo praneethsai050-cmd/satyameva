@@ -6,7 +6,11 @@ from models.document import Doc
 from models.verification_log import VerificationLog
 from security import make_qr_token
 
+if sys.platform == 'win32' and hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 app = create_app()
+app.config['MAIL_SUPPRESS_SEND'] = True
 fails = []
 
 def want(label, cond, extra=''):

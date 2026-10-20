@@ -26,6 +26,10 @@ class Institution(db.Model):
 
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
+    # Subscription Management
+    subscription_expires_at = db.Column(db.DateTime, nullable=True)   # None = lifetime / unconfigured
+    subscription_plan = db.Column(db.String(50), default='annual', nullable=True)  # 'annual', 'trial', 'lifetime'
+
     # Relationships
     users = db.relationship(
         'User',
@@ -46,6 +50,21 @@ class Institution(db.Model):
     @property
     def status_class(self) -> str:
         return 'valid' if self.is_approved else 'revoked'
+
+    @property
+    def subscription_is_active(self) -> bool:
+        if not self.is_approved:
+            return False
+        if self.subscription_expires_at is None:
+            return True
+        return utcnow() < self.subscription_expires_at
+
+    @property
+    def subscription_days_left(self) -> int | None:
+        if self.subscription_expires_at is None:
+            return None
+        delta = (self.subscription_expires_at - utcnow()).days
+        return max(0, delta)
 
     def __repr__(self) -> str:
         return f'<Institution {self.short_code} approved={self.is_approved}>'

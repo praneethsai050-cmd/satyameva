@@ -1,0 +1,13 @@
+Satyameva • Jaypee Credentials
+==============================
+
+Verify your student email address
+
+Dear {{ student.full_name }},
+
+Your institution ({{ student.institution }}) has registered your student profile on the Satyameva Cryptographic Credential Protocol.
+
+Please verify your email address by opening this link:
+{{ verify_url }}
+
+This link will activate your student credentials on Satyameva.

@@ -35,6 +35,9 @@ def dashboard():
         'documents': Doc.query.count(),
         'revoked': Doc.query.filter_by(revoked=True).count(),
         'verifications': VerificationLog.query.count(),
+        'sub_active': sum(1 for i in Institution.query.filter_by(is_approved=True).all() if i.subscription_is_active),
+        'sub_expiring': sum(1 for i in Institution.query.filter_by(is_approved=True).all() if i.subscription_is_active and i.subscription_days_left is not None and i.subscription_days_left <= 30),
+        'sub_expired': sum(1 for i in Institution.query.filter_by(is_approved=True).all() if not i.subscription_is_active),
     }
     recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
     pending = Institution.query.filter_by(is_approved=False).order_by(Institution.created_at.desc()).all()
@@ -94,6 +97,7 @@ def institutions():
 @admin_bp.route('/institutions/<int:inst_id>/approve', methods=['POST'])
 @admin_required
 def approve_institution(inst_id):
+    from datetime import datetime, timedelta
     inst = db.session.get(Institution, inst_id)
     if not inst:
         flash('Institution not found.', 'danger')
@@ -101,9 +105,57 @@ def approve_institution(inst_id):
     inst.is_approved = True
     inst.approved_at = utcnow()
     inst.approved_by_id = current_user.id
+
+    # Configure subscription
+    plan = request.form.get('subscription_plan', 'annual').strip()
+    expires_str = request.form.get('subscription_expires_at', '').strip()
+    if expires_str:
+        try:
+            inst.subscription_expires_at = datetime.strptime(expires_str, '%Y-%m-%d')
+        except ValueError:
+            inst.subscription_expires_at = utcnow() + timedelta(days=365)
+    else:
+        inst.subscription_expires_at = utcnow() + timedelta(days=365)
+    inst.subscription_plan = plan
+
     db.session.commit()
-    flash(f'"{inst.name}" approved.', 'success')
+    flash(f'"{inst.name}" approved with {plan.upper()} subscription until {inst.subscription_expires_at.strftime("%Y-%m-%d")}.', 'success')
     return redirect(url_for('admin.institutions'))
+
+
+@admin_bp.route('/institutions/<int:inst_id>/set-subscription', methods=['POST'])
+@admin_required
+def set_subscription(inst_id):
+    from datetime import datetime, timedelta
+    inst = db.session.get(Institution, inst_id)
+    if not inst:
+        flash('Institution not found.', 'danger')
+        return redirect(url_for('admin.institutions'))
+
+    plan = request.form.get('subscription_plan', 'annual').strip()
+    expires_str = request.form.get('subscription_expires_at', '').strip()
+    if expires_str:
+        try:
+            inst.subscription_expires_at = datetime.strptime(expires_str, '%Y-%m-%d')
+        except ValueError:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('admin.institutions'))
+    else:
+        inst.subscription_expires_at = utcnow() + timedelta(days=365)
+    inst.subscription_plan = plan
+    db.session.commit()
+    flash(f'Subscription updated for "{inst.name}" ({plan.upper()} valid until {inst.subscription_expires_at.strftime("%Y-%m-%d")}).', 'success')
+    return redirect(url_for('admin.institutions'))
+
+
+@admin_bp.route('/institutions/<int:inst_id>')
+@admin_required
+def institution_detail(inst_id):
+    inst = db.session.get(Institution, inst_id)
+    if not inst:
+        flash('Institution not found.', 'danger')
+        return redirect(url_for('admin.institutions'))
+    return render_template('admin/institution_detail.html', inst=inst)
 
 
 @admin_bp.route('/institutions/<int:inst_id>/revoke', methods=['POST'])

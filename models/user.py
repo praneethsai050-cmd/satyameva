@@ -45,7 +45,7 @@ class User(UserMixin, db.Model):
     public_key = db.Column(db.Text, nullable=True)
     private_key = db.Column(db.Text, nullable=True)
 
-    student = db.relationship('Student', back_populates='user', uselist=False)
+    student = db.relationship('Student', foreign_keys='Student.user_id', back_populates='user', uselist=False)
     institution = db.relationship(
         'Institution',
         foreign_keys=[institution_id],

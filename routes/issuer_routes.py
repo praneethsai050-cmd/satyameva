@@ -16,8 +16,10 @@ from flask import (
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
-from decorators import issuer_required
-from extensions import db
+from decorators import issuer_required, subscription_required
+from models.credential_request import CredentialRequest
+import secrets
+from extensions import db, utcnow
 from models.document import DOC_TYPES, STATUS_EXPIRED, Doc
 from models.student import Student
 from models.user import ROLE_STUDENT, User
@@ -29,6 +31,7 @@ issuer_bp = Blueprint('issuer', __name__, url_prefix='/issuer')
 
 @issuer_bp.route('/extract', methods=['POST'])
 @issuer_required
+@subscription_required
 def extract_fields():
     """AI-powered field extraction from uploaded document using Gemini."""
     file = request.files.get('document')
@@ -288,6 +291,7 @@ def dashboard():
 
 @issuer_bp.route('/issue', methods=['GET', 'POST'])
 @issuer_required
+@subscription_required
 def issue():
     # Preserve what the issuer typed so a validation bounce is not punishing.
     form = {
@@ -336,6 +340,15 @@ def issue():
         validity = int(form['validity_days']) if form['validity_days'] else None
         doc_title = form['title'] or DOC_TYPES.get(form['doc_type'], ('Credential', '📄', 365))[0]
 
+        dob_extracted = (request.form.get('dob') or '').strip()
+        if dob_extracted and student:
+            student.dob = dob_extracted
+        if student and not student.issuer_approved:
+            student.issuer_approved = True
+            student.issuer_approved_by_id = current_user.id
+            student.issuer_approved_at = utcnow()
+            db.session.commit()
+
         doc = issue_credential(
             student, current_user, form['doc_type'],
             doc_title,
@@ -371,6 +384,7 @@ def _validate_issue(form: dict) -> dict:
 
 @issuer_bp.route('/bulk-issue', methods=['GET', 'POST'])
 @issuer_required
+@subscription_required
 def bulk_issue():
     """
     Bulk credential issuance from CSV file upload.
@@ -455,3 +469,131 @@ def revoke(doc_id):
     flash(f'Revoked "{doc.title}" for {doc.student.full_name}. '
           f'It will now fail verification.', 'warning')
     return redirect(url_for('issuer.dashboard'))
+
+
+# ─── Student Management & Verification Gates ──────────────────────────────────
+@issuer_bp.route('/students')
+@issuer_required
+def students():
+    """List students belonging to this issuer's campus/organization."""
+    inst_org = getattr(current_user, 'organization', '') or ''
+    inst_code = ''
+    if getattr(current_user, 'institution', None):
+        inst_code = current_user.institution.short_code.upper()
+
+    query = Student.query.join(Student.user)
+    if inst_code:
+        query = query.filter(
+            db.or_(
+                Student.institution.ilike(f'%{inst_code}%'),
+                Student.institution.ilike(f'%{inst_org}%') if inst_org else False,
+                User.organization.ilike(f'%{inst_code}%'),
+                User.institution_id == current_user.institution_id if current_user.institution_id else False,
+            )
+        )
+    elif inst_org:
+        query = query.filter(
+            db.or_(
+                Student.institution.ilike(f'%{inst_org}%'),
+                User.organization.ilike(f'%{inst_org}%'),
+            )
+        )
+
+    all_students = query.order_by(Student.created_at.desc()).all()
+    if not all_students:
+        all_students = Student.query.order_by(Student.created_at.desc()).limit(100).all()
+
+    req_count = CredentialRequest.query.filter_by(status='pending').count()
+    return render_template('issuer/students.html', students=all_students, pending_requests_count=req_count)
+
+
+@issuer_bp.route('/students/<int:student_id>/approve', methods=['POST'])
+@issuer_required
+def approve_student(student_id):
+    student = db.session.get(Student, student_id)
+    if not student:
+        flash('Student not found.', 'danger')
+        return redirect(url_for('issuer.students'))
+
+    student.issuer_approved = True
+    student.issuer_approved_by_id = current_user.id
+    from extensions import utcnow
+    student.issuer_approved_at = utcnow()
+    db.session.commit()
+
+    from services.email_service import send_student_approved_email
+    send_student_approved_email(student)
+
+    flash(f'Student "{student.full_name}" ({student.roll_number}) approved successfully.', 'success')
+    return redirect(url_for('issuer.students'))
+
+
+@issuer_bp.route('/students/<int:student_id>/reject', methods=['POST'])
+@issuer_required
+def reject_student(student_id):
+    student = db.session.get(Student, student_id)
+    if not student:
+        flash('Student not found.', 'danger')
+        return redirect(url_for('issuer.students'))
+
+    student.issuer_approved = False
+    db.session.commit()
+    flash(f'Student "{student.full_name}" access approval revoked.', 'warning')
+    return redirect(url_for('issuer.students'))
+
+
+@issuer_bp.route('/students/<int:student_id>/send-verify-email', methods=['POST'])
+@issuer_required
+def send_verify_email(student_id):
+    student = db.session.get(Student, student_id)
+    if not student:
+        flash('Student not found.', 'danger')
+        return redirect(url_for('issuer.students'))
+
+    token = secrets.token_hex(32)
+    student.email_verify_token = token
+    from extensions import utcnow
+    student.email_verify_sent_at = utcnow()
+    db.session.commit()
+
+    verify_url = url_for('auth.verify_email', token=token, _external=True)
+    from services.email_service import send_student_verification_email
+    sent = send_student_verification_email(student, verify_url)
+
+    target_email = getattr(getattr(student, 'user', None), 'email', 'student email')
+    if sent:
+        flash(f'Verification email dispatched to {target_email}.', 'success')
+    else:
+        flash(f'Verification link generated: {verify_url}', 'info')
+    return redirect(url_for('issuer.students'))
+
+
+# ─── Student Credential Requests (Correction / Re-issuance) ───────────────────
+@issuer_bp.route('/requests')
+@issuer_required
+def requests():
+    """View all credential correction and re-issuance requests from students."""
+    reqs = CredentialRequest.query.order_by(CredentialRequest.created_at.desc()).all()
+    return render_template('issuer/requests.html', requests=reqs)
+
+
+@issuer_bp.route('/requests/<int:req_id>/resolve', methods=['POST'])
+@issuer_required
+def resolve_request(req_id):
+    cr = db.session.get(CredentialRequest, req_id)
+    if not cr:
+        flash('Request not found.', 'danger')
+        return redirect(url_for('issuer.requests'))
+
+    action = request.form.get('action')  # 'approve' | 'reject'
+    note = (request.form.get('resolver_note') or '').strip()
+
+    from extensions import utcnow
+    cr.status = 'approved' if action == 'approve' else 'rejected'
+    cr.resolved_at = utcnow()
+    cr.resolved_by_id = current_user.id
+    cr.resolver_note = note
+    db.session.commit()
+
+    flash(f'Request #{cr.id} marked as {cr.status.upper()}.', 'success')
+    return redirect(url_for('issuer.requests'))

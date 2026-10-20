@@ -86,12 +86,12 @@ def make_certificate_image(title, student_name, roll, program, institution,
     return buffer.getvalue()
 
 
-# ─── Seeding ──────────────────────────────────────────────────────────────────
-def make_user(username, email, role, organization=None):
+def make_user(username, email, role, organization=None, password=None):
     existing = User.query.filter_by(username=username).first()
     if existing:
         return existing
-    salt, digest, iterations = hash_password(DEMO_PASSWORD)
+    pw = password if password is not None else DEMO_PASSWORD
+    salt, digest, iterations = hash_password(pw)
     user = User(username=username, email=email, role=role, organization=organization,
                 password_salt=salt, password_hash=digest, password_iterations=iterations)
     db.session.add(user)
@@ -101,6 +101,7 @@ def make_user(username, email, role, organization=None):
 
 def seed(reset: bool = False):
     app = create_app()
+    app.config['MAIL_SUPPRESS_SEND'] = True
 
     with app.app_context():
         if reset:
@@ -155,11 +156,17 @@ def seed(reset: bool = False):
 
         jiit_inst = inst_map['JIIT']
 
-        # ---- Admin account ----
+        # ---- Admin accounts ----
+        admin_user = os.environ.get('ADMIN_USERNAME', 'admin').strip()
+        admin_pass = os.environ.get('ADMIN_PASSWORD', 'Satyameva@2026').strip()
+        master_admin = make_user(admin_user, 'hackathonsage@gmail.com', ROLE_ADMIN, password=admin_pass)
+        master_admin.institution_id = jiit_inst.id
+
         admin = make_user('satyameva.admin', 'admin@satyameva.edu', ROLE_ADMIN)
         admin.institution_id = jiit_inst.id
         db.session.flush()
         print(f'· admin    satyameva.admin / {DEMO_PASSWORD}')
+        print(f'· master   {admin_user} / {admin_pass}')
 
         # ---- Accounts ----
         issuer = make_user('jiit.registrar', 'registrar@jiit.ac.in', ROLE_ISSUER,

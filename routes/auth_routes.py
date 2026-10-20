@@ -214,3 +214,20 @@ def logout():
     session.clear()
     flash('You have been signed out.', 'info')
     return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/verify-email/<token>')
+def verify_email(token):
+    from models.student import Student
+    clean_token = (token or '').strip()
+    student = Student.query.filter_by(email_verify_token=clean_token).first()
+    if not student:
+        flash('Invalid or expired email verification link.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    student.email_verified = True
+    student.email_verify_token = None
+    db.session.commit()
+    target_mail = student.user.email if student.user else 'your account'
+    flash(f'Student email ({target_mail}) verified successfully! You can now log in.', 'success')
+    return redirect(url_for('auth.login'))

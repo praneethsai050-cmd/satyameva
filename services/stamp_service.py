@@ -294,7 +294,7 @@ def build_certificate_page(doc, student, verify_url: str, campus_code: str | Non
 
 
 # ─── Public entry point ───────────────────────────────────────────────────────
-def generate_stamped_pdf(doc, student, verify_url: str, campus_code: str | None = None) -> bytes:
+def generate_stamped_pdf(doc, student, verify_url: str, campus_code: str | None = None, password: str | None = None) -> bytes:
     """
     Build the downloadable stamped PDF.
 
@@ -319,7 +319,27 @@ def generate_stamped_pdf(doc, student, verify_url: str, campus_code: str | None 
     buffer = BytesIO()
     pages[0].save(buffer, format='PDF', save_all=True,
                   append_images=pages[1:], resolution=150.0)
-    return buffer.getvalue()
+    raw_pdf = buffer.getvalue()
+
+    if password:
+        clean_pw = str(password).strip()
+        if clean_pw:
+            try:
+                import pikepdf
+                encrypted_buf = BytesIO()
+                with pikepdf.open(BytesIO(raw_pdf)) as pdf_doc:
+                    pdf_doc.save(
+                        encrypted_buf,
+                        encryption=pikepdf.Encryption(
+                            owner=clean_pw + '_satyameva_owner',
+                            user=clean_pw,
+                            R=6
+                        )
+                    )
+                return encrypted_buf.getvalue()
+            except Exception:
+                pass
+    return raw_pdf
 
 
 def generate_stamped_image(doc) -> bytes | None:

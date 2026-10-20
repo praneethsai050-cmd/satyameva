@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#070b14;color:#e2e8f0;padding:2rem">
+  <div style="max-width:560px;margin:0 auto;background:#0d1424;border:1px solid #1e293b;border-radius:12px;padding:2rem">
+    <div style="color:#10b981;font-size:1.25rem;font-weight:700;margin-bottom:1rem">✅ Account Approved</div>
+    <h2 style="color:#ffffff;margin-top:0">Welcome to Satyameva</h2>
+    <p>Dear {{ student.full_name }},</p>
+    <p>Your student profile (Roll Number: <b>{{ student.roll_number }}</b>) has been officially approved by your institution registrar.</p>
+    <p>You can now sign in to your student portal to access your blockchain-anchored degrees, certificates, and digital credentials.</p>
+    <div style="text-align:center;margin:2rem 0">
+      <a href="{{ login_url }}" style="background:#10b981;color:#ffffff;padding:.8rem 1.8rem;text-decoration:none;border-radius:8px;font-weight:700;display:inline-block">Open Student Portal</a>
+    </div>
+  </div>
+</body>
+</html>

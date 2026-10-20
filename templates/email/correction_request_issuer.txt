@@ -1,0 +1,11 @@
+Satyameva • Jaypee Credentials
+==============================
+
+Credential {{ req.request_type|upper }} Request
+
+Student: {{ req.student.full_name }} (Roll: {{ req.student.roll_number }})
+Message: {{ req.message }}
+{% if req.doc %}Target Document: {{ req.doc.title }}{% endif %}
+
+Review requests in your Issuer Portal:
+{{ requests_url }}

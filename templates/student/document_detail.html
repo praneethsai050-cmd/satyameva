@@ -110,7 +110,7 @@
 
               <!-- 3D Holographic Security Seal -->
               <div class="holo-seal-3d" style="position:absolute; bottom:1.5rem; left:1.5rem; z-index:15"
-                   title="Cryptographic Proof Seal — Interactive 3D holographic authentication">
+                   data-holo-inspect data-title="{{ doc.title }}" data-recipient="{{ current_user.display_name }}" data-issuer="{{ doc.issuer_name or brand }}" data-issued-on="{{ doc.issued_on|date }}" data-status="{{ doc.status_label }}" data-block-index="{{ doc.block_index or 1 }}" data-hash="{{ doc.doc_hash }}" data-type="{{ doc.type_label }}" title="Cryptographic Proof Seal — Interactive 3D holographic authentication (Click to Inspect)">
                 <div class="holo-seal-inner">
                   <b>{{ campus_code }}</b>
                   <span>GENUINE</span>
@@ -197,8 +197,22 @@
         </div>
       </div>
 
-      <!-- Downloads -->
+      <!-- Downloads & 3D WebGL Inspection -->
       <div class="row">
+        <button class="btn btn-ghost" type="button"
+                data-holo-inspect
+                data-title="{{ doc.title }}"
+                data-recipient="{{ current_user.display_name }}"
+                data-issuer="{{ doc.issuer_name or brand }}"
+                data-issued-on="{{ doc.issued_on|date }}"
+                data-status="{{ doc.status_label }}"
+                data-block-index="{{ doc.block_index or 1 }}"
+                data-hash="{{ doc.doc_hash }}"
+                data-type="{{ doc.type_label }}"
+                style="border-color:var(--campus-accent, #00f2fe); color:var(--campus-accent, #00f2fe)"
+                title="Open interactive 3D WebGL holographic credential inspection">
+          <span aria-hidden="true">✨</span> 3D Holographic Inspect
+        </button>
         <a class="btn btn-primary" href="{{ url_for('student.download_stamped', doc_id=doc.id) }}">
           <span aria-hidden="true">⬇</span> Download stamped PDF
         </a>
@@ -271,7 +285,7 @@
         </div>
 
         <!-- Cyber Radar Stage -->
-        <div class="qr-radar-stage" data-qr-stage data-qr-permanent="true">
+        <div class="qr-radar-stage" data-qr-stage data-qr-permanent="true" data-qr-json="{{ url_for('student.document_qr_json', doc_id=doc.id) }}">
 
           <!-- Revolving Cyber Radar Rings & Sweep -->
           <div class="qr-radar-ring outer" aria-hidden="true"></div>

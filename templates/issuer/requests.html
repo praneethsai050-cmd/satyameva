@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Issuer · Credential Correction Requests{% endblock %}
+
+{% block content %}
+<div class="stack stack-8">
+
+  <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
+    <div>
+      <span class="badge" style="background:var(--accent-glow);color:var(--accent);font-size:.8rem;font-weight:700">📬 STUDENT GRIEVANCES &amp; REISSUANCE</span>
+      <h1 style="margin:.35rem 0 0;font-size:1.8rem">Credential Correction Requests</h1>
+      <p class="faint small" style="margin:.25rem 0 0">
+        Review student requests for typographical corrections, grade revisions, or document re-anchoring.
+      </p>
+    </div>
+    <div class="row" style="gap:.75rem">
+      <a href="{{ url_for('issuer.students') }}" class="btn btn-ghost btn-sm">👥 Manage Students</a>
+      <a href="{{ url_for('issuer.dashboard') }}" class="btn btn-ghost btn-sm">← Issuer Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card" style="overflow-x:auto;padding:1.25rem">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Type</th>
+          <th>Document</th>
+          <th>Message / Request Detail</th>
+          <th>Status</th>
+          <th>Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in requests %}
+        <tr>
+          <td><code>#{{ r.id }}</code></td>
+          <td>
+            <b>{{ r.student.full_name }}</b>
+            <div class="faint small">{{ r.student.roll_number }}</div>
+          </td>
+          <td>
+            <span class="badge" style="font-size:.75rem;background:rgba(255,255,255,0.06)">
+              {{ r.request_type|upper }}
+            </span>
+          </td>
+          <td>
+            {% if r.doc %}
+              <div style="font-weight:600">{{ r.doc.title }}</div>
+              <code class="faint small">{{ r.doc.doc_hash[:12] }}…</code>
+            {% else %}
+              <span class="faint small">General / New Credential</span>
+            {% endif %}
+          </td>
+          <td style="max-width:320px">
+            <div style="font-size:.9rem;white-space:pre-wrap">{{ r.message }}</div>
+            <div class="faint tiny" style="margin-top:.25rem">Submitted on {{ r.created_at|datetime }}</div>
+          </td>
+          <td>
+            <span class="badge badge-{{ r.status_badge_class }}" style="font-size:.78rem">
+              {{ r.status|upper }}
+            </span>
+            {% if r.resolver_note %}
+              <div class="faint small" style="margin-top:.2rem">Note: {{ r.resolver_note }}</div>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.status == 'pending' %}
+            <form method="post" action="{{ url_for('issuer.resolve_request', req_id=r.id) }}" class="stack" style="gap:.4rem">
+              <input type="text" name="resolver_note" class="form-control form-control-sm" placeholder="Resolution note…">
+              <div class="row" style="gap:.3rem">
+                <button type="submit" name="action" value="approve" class="btn btn-primary btn-sm">✅ Resolve</button>
+                <button type="submit" name="action" value="reject" class="btn btn-ghost btn-sm">Dismiss</button>
+              </div>
+            </form>
+            {% else %}
+            <span class="faint small">Resolved on {{ r.resolved_at|date if r.resolved_at else '—' }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="faint" style="text-align:center;padding:2.5rem">
+            No credential correction requests from students at this time.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

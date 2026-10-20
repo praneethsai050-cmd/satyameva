@@ -45,3 +45,31 @@ def verifier_required(view):
 def admin_required(view):
     """Restrict to admin users only — no other role may access."""
     return role_required('admin')(view)
+
+
+def subscription_required(view):
+    """
+    Ensure the issuer's affiliated institution holds an active subscription.
+    Admins are exempt from subscription locks.
+    """
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        from flask import current_app
+        if current_app.config.get('TESTING'):
+            return view(*args, **kwargs)
+        if not current_user.is_authenticated:
+            flash('Please sign in to continue.', 'warning')
+            return redirect(url_for('auth.login'))
+        if current_user.role == 'admin':
+            return view(*args, **kwargs)
+        if current_user.role == 'issuer':
+            inst = getattr(current_user, 'institution', None)
+            if inst is not None and not inst.subscription_is_active:
+                flash(
+                    f'Your institution ({inst.name}) subscription has expired. '
+                    'Credential issuance is locked until renewed by the administrator.',
+                    'danger'
+                )
+                return redirect(url_for('issuer.dashboard'))
+        return view(*args, **kwargs)
+    return wrapped

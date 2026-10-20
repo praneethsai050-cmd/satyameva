@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Admin · {{ inst.name }}{% endblock %}
+
+{% block content %}
+<div class="stack" style="gap:1.75rem">
+
+  <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
+    <div>
+      <div class="row" style="align-items:center;gap:.75rem">
+        <code style="font-size:1.1rem;padding:.2rem .6rem">{{ inst.short_code }}</code>
+        <h1 style="margin:0;font-size:1.8rem">{{ inst.name }}</h1>
+      </div>
+      <p class="faint small" style="margin:.35rem 0 0">Domain: {{ inst.domain or 'None' }} · Registered on {{ inst.created_at|date }}</p>
+    </div>
+    <div class="row" style="gap:.5rem">
+      <a href="{{ url_for('admin.institutions') }}" class="btn btn-ghost btn-sm">← Back to Institutions</a>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:1.5rem">
+    
+    {# ── Card 1: Subscription Status & Management ── #}
+    <div class="card stack" style="gap:1.25rem;border-color:var(--accent)">
+      <div class="row row-between" style="align-items:center">
+        <h3 style="margin:0;font-size:1.2rem">💳 RIDEHACK Subscription License</h3>
+        {% if inst.subscription_is_active %}
+          <span class="badge badge-valid">Active License</span>
+        {% else %}
+          <span class="badge badge-revoked">Subscription Inactive</span>
+        {% endif %}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;background:rgba(255,255,255,0.02);padding:1rem;border-radius:8px">
+        <div>
+          <div class="faint small">Current Plan</div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--accent);margin-top:.2rem">
+            {{ (inst.subscription_plan or 'annual')|upper }}
+          </div>
+        </div>
+        <div>
+          <div class="faint small">Days Remaining</div>
+          <div style="font-size:1.2rem;font-weight:700;margin-top:.2rem">
+            {{ inst.subscription_days_left if inst.subscription_days_left is not none else '∞' }} Days
+          </div>
+        </div>
+        <div>
+          <div class="faint small">Expiration Date</div>
+          <div style="font-weight:600;margin-top:.2rem">
+            {{ inst.subscription_expires_at|date if inst.subscription_expires_at else 'Perpetual' }}
+          </div>
+        </div>
+        <div>
+          <div class="faint small">Approval Status</div>
+          <div style="margin-top:.2rem">
+            <span class="badge badge-{{ inst.status_class }}">{{ inst.status_label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:0">
+
+      <h4 style="margin:0;font-size:1rem">Update Institution Subscription</h4>
+      <form method="post" action="{{ url_for('admin.set_subscription', inst_id=inst.id) }}" class="stack" style="gap:.9rem">
+        <div>
+          <label class="faint small" style="display:block;margin-bottom:.3rem">Subscription Tier</label>
+          <select name="subscription_plan" class="form-control" style="width:100%">
+            <option value="annual" {% if inst.subscription_plan == 'annual' %}selected{% endif %}>Annual Tier (₹1,50,000 / Campus / Year)</option>
+            <option value="trial" {% if inst.subscription_plan == 'trial' %}selected{% endif %}>30-Day Evaluation Trial</option>
+            <option value="lifetime" {% if inst.subscription_plan == 'lifetime' %}selected{% endif %}>Consortium Founding Node (Perpetual)</option>
+          </select>
+        </div>
+        <div>
+          <label class="faint small" style="display:block;margin-bottom:.3rem">Valid Until (Expiry Date)</label>
+          <input type="date" name="subscription_expires_at" class="form-control" style="width:100%"
+                 value="{{ inst.subscription_expires_at.strftime('%Y-%m-%d') if inst.subscription_expires_at else '' }}">
+        </div>
+        <div class="row" style="justify-content:flex-end">
+          <button type="submit" class="btn btn-primary btn-sm">Update Plan & Validity</button>
+        </div>
+      </form>
+    </div>
+
+    {# ── Card 2: Institution Metadata & Users ── #}
+    <div class="card stack" style="gap:1.25rem">
+      <h3 style="margin:0;font-size:1.2rem">🏛️ Institution Details & Issuers</h3>
+
+      <div class="stack" style="gap:.6rem;font-size:.9rem">
+        <div class="row row-between"><span class="faint">Full Legal Name:</span> <b>{{ inst.name }}</b></div>
+        <div class="row row-between"><span class="faint">Campus Short Code:</span> <code>{{ inst.short_code }}</code></div>
+        <div class="row row-between"><span class="faint">Official Domain:</span> <span>{{ inst.domain or '—' }}</span></div>
+        <div class="row row-between"><span class="faint">Physical Address:</span> <span>{{ inst.address or '—' }}</span></div>
+        <div class="row row-between"><span class="faint">Approved At:</span> <span>{{ inst.approved_at|datetime if inst.approved_at else '—' }}</span></div>
+        <div class="row row-between"><span class="faint">Active Issuer Staff:</span> <b>{{ inst.issuer_count }} accounts</b></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:0">
+
+      <h4 style="margin:0;font-size:1rem">Registered Staff / Issuers</h4>
+      <div style="max-height:220px;overflow-y:auto">
+        <table class="table" style="font-size:.85rem">
+          <thead><tr><th>User</th><th>Role</th><th>Active</th></tr></thead>
+          <tbody>
+            {% for u in inst.users %}
+            <tr>
+              <td><b>{{ u.display_name }}</b><div class="faint small">{{ u.email }}</div></td>
+              <td><code>{{ u.role }}</code></td>
+              <td><span class="badge {{ 'badge-valid' if u.is_active else 'badge-revoked' }}">{{ 'Yes' if u.is_active else 'No' }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="faint text-center">No users affiliated with this institution yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

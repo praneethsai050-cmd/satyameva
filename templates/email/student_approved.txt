@@ -1,0 +1,11 @@
+Satyameva • Jaypee Credentials
+==============================
+
+Account Approved
+
+Dear {{ student.full_name }},
+
+Your student profile (Roll Number: {{ student.roll_number }}) has been officially approved by your institution registrar.
+
+You can now sign in at:
+{{ login_url }}

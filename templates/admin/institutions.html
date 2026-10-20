@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Admin · Institutions{% endblock %}
+{% block title %}Admin · Institutions & Subscriptions{% endblock %}
 
 {% block content %}
 <div class="stack" style="gap:1.5rem">
 
   <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
     <div>
-      <h1 style="margin:0;font-size:1.6rem">🏢 Institution Management</h1>
-      <p class="faint small" style="margin:.25rem 0 0">{{ pagination.total }} registered</p>
+      <h1 style="margin:0;font-size:1.6rem">🏢 Institution Management & Subscriptions</h1>
+      <p class="faint small" style="margin:.25rem 0 0">{{ pagination.total }} registered institutions · RIDEHACK'26 Multi-Campus Licensing</p>
     </div>
     <a href="{{ url_for('admin.dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
   </div>
@@ -22,35 +22,107 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Code</th><th>Name</th><th>Domain</th>
-          <th>Issuers</th><th>Status</th><th>Created</th><th>Actions</th>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Issuers</th>
+          <th>Status</th>
+          <th>Subscription Plan</th>
+          <th>Validity / Expiry</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for inst in pagination.items %}
         <tr>
           <td><code>{{ inst.short_code }}</code></td>
-          <td><b>{{ inst.name }}</b></td>
-          <td class="faint small">{{ inst.domain or '—' }}</td>
+          <td>
+            <a href="{{ url_for('admin.institution_detail', inst_id=inst.id) }}" style="font-weight:700;color:inherit;text-decoration:none">
+              {{ inst.name }}
+            </a>
+            <div class="faint small">{{ inst.domain or '—' }}</div>
+          </td>
           <td class="faint small">{{ inst.issuer_count }}</td>
           <td>
             <span class="badge badge-{{ inst.status_class }}" style="font-size:.78rem">
               {{ inst.status_label }}
             </span>
           </td>
-          <td class="faint small">{{ inst.created_at|date }}</td>
           <td>
-            {% if not inst.is_approved %}
-            <form method="post" action="{{ url_for('admin.approve_institution', inst_id=inst.id) }}" style="display:inline">
-              <button class="btn btn-primary btn-sm" type="submit">✅ Approve</button>
-            </form>
+            {% if inst.is_approved %}
+              <span class="badge" style="background:var(--accent-glow);color:var(--accent);font-size:.75rem;font-weight:700">
+                {{ (inst.subscription_plan or 'annual')|upper }}
+              </span>
             {% else %}
-            <form method="post" action="{{ url_for('admin.revoke_institution', inst_id=inst.id) }}" style="display:inline">
-              <button class="btn btn-ghost btn-sm" type="submit"
-                      onclick="return confirm('Revoke approval for {{ inst.name }}?')">
-                🚫 Revoke
+              <span class="faint small">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if inst.is_approved %}
+              {% if inst.subscription_is_active %}
+                {% if inst.subscription_days_left is not none and inst.subscription_days_left <= 30 %}
+                  <span class="badge badge-expiring" style="font-size:.75rem">⚠️ Expiring: {{ inst.subscription_days_left }}d left</span>
+                {% else %}
+                  <span class="badge badge-valid" style="font-size:.75rem">✅ Active ({{ inst.subscription_days_left }}d)</span>
+                {% endif %}
+                <div class="faint small">{{ inst.subscription_expires_at|date if inst.subscription_expires_at else 'Lifetime' }}</div>
+              {% else %}
+                <span class="badge badge-revoked" style="font-size:.75rem">❌ Expired</span>
+                <div class="faint small">{{ inst.subscription_expires_at|date }}</div>
+              {% endif %}
+            {% else %}
+              <span class="faint small">Pending Approval</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="row" style="gap:.5rem;flex-wrap:nowrap">
+              {% if not inst.is_approved %}
+              <form method="post" action="{{ url_for('admin.approve_institution', inst_id=inst.id) }}" style="display:inline">
+                <input type="hidden" name="subscription_plan" value="annual">
+                <button class="btn btn-primary btn-sm" type="submit">✅ Approve (1-Yr)</button>
+              </form>
+              {% else %}
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('sub-modal-{{ inst.id }}').style.display='block'" title="Edit Subscription">
+                ⚙️ Plan
               </button>
-            </form>
+              <form method="post" action="{{ url_for('admin.revoke_institution', inst_id=inst.id) }}" style="display:inline">
+                <button class="btn btn-ghost btn-sm" type="submit"
+                        onclick="return confirm('Revoke approval for {{ inst.name }}?')">
+                  🚫 Revoke
+                </button>
+              </form>
+              {% endif %}
+            </div>
+
+            {% if inst.is_approved %}
+            <!-- Modal for Subscription Management -->
+            <div id="sub-modal-{{ inst.id }}" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;backdrop-filter:blur(3px)">
+              <div style="background:var(--card-bg, #0B1120);border:1px solid var(--border);border-radius:12px;max-width:440px;margin:10vh auto;padding:1.5rem;box-shadow:0 20px 40px rgba(0,0,0,0.5)">
+                <div class="row row-between" style="align-items:center;margin-bottom:1rem">
+                  <h3 style="margin:0;font-size:1.15rem">Manage Subscription: {{ inst.short_code }}</h3>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('sub-modal-{{ inst.id }}').style.display='none'">✕</button>
+                </div>
+                <form method="post" action="{{ url_for('admin.set_subscription', inst_id=inst.id) }}" class="stack" style="gap:1rem">
+                  <div>
+                    <label class="faint small" style="display:block;margin-bottom:.35rem">Subscription Tier</label>
+                    <select name="subscription_plan" class="form-control" style="width:100%">
+                      <option value="annual" {% if inst.subscription_plan == 'annual' %}selected{% endif %}>Annual Tier (₹1,50,000/yr)</option>
+                      <option value="trial" {% if inst.subscription_plan == 'trial' %}selected{% endif %}>30-Day Pilot Trial</option>
+                      <option value="lifetime" {% if inst.subscription_plan == 'lifetime' %}selected{% endif %}>Consortium Partner (Perpetual)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="faint small" style="display:block;margin-bottom:.35rem">Valid Until (Expiry Date)</label>
+                    <input type="date" name="subscription_expires_at" class="form-control" style="width:100%"
+                           value="{{ inst.subscription_expires_at.strftime('%Y-%m-%d') if inst.subscription_expires_at else '' }}">
+                    <span class="faint small">Leave empty or far future for perpetual access.</span>
+                  </div>
+                  <div class="row" style="justify-content:flex-end;gap:.5rem;margin-top:.5rem">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('sub-modal-{{ inst.id }}').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Subscription</button>
+                  </div>
+                </form>
+              </div>
+            </div>
             {% endif %}
           </td>
         </tr>

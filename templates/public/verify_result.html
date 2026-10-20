@@ -249,6 +249,22 @@
 
   <!-- ══ Actions ═════════════════════════════════════════════════════════ -->
   <div class="row no-print" style="justify-content:center">
+    {% if reveal and doc %}
+    <button class="btn btn-ghost" type="button"
+            data-holo-inspect
+            data-title="{{ doc.title }}"
+            data-recipient="{{ doc.student.full_name }}"
+            data-issuer="{{ doc.issuer_name or brand }}"
+            data-issued-on="{{ doc.issued_on|date }}"
+            data-status="{{ doc.status_label }}"
+            data-block-index="{{ block.index if block else 1 }}"
+            data-hash="{{ queried_hash }}"
+            data-type="{{ doc.type_label }}"
+            style="border-color:var(--campus-accent, #00f2fe); color:var(--campus-accent, #00f2fe)"
+            title="Open interactive 3D WebGL holographic credential inspection">
+      <span aria-hidden="true">✨</span> 3D Holographic Inspect
+    </button>
+    {% endif %}
     <a class="btn btn-primary" href="{{ url_for('public.verify') }}">
       <span aria-hidden="true">🔎</span> Verify another
     </a>

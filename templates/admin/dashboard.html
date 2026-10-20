@@ -8,12 +8,39 @@
   <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
     <div>
       <h1 style="margin:0;font-size:1.8rem">⚙️ Admin Dashboard</h1>
-      <p class="faint small" style="margin:.25rem 0 0">System-wide oversight · {{ utcnow()|datetime }}</p>
+      <p class="faint small" style="margin:.25rem 0 0">System-wide oversight & Multi-Campus Licensing · {{ utcnow()|datetime }}</p>
     </div>
     <div class="row" style="gap:.75rem">
-      <a href="{{ url_for('admin.institutions') }}" class="btn btn-primary btn-sm">Institutions</a>
+      <a href="{{ url_for('admin.institutions') }}" class="btn btn-primary btn-sm">Institutions & Plans</a>
       <a href="{{ url_for('admin.users') }}" class="btn btn-ghost btn-sm">Manage Users</a>
       <a href="{{ url_for('admin.documents') }}" class="btn btn-ghost btn-sm">All Documents</a>
+    </div>
+  </div>
+
+  {# ── Subscription Oversight Bar ── #}
+  <div class="card" style="border:1px solid var(--accent);background:linear-gradient(135deg, rgba(6,182,212,0.06), rgba(11,17,32,0.6));padding:1.25rem 1.5rem">
+    <div class="row row-between" style="align-items:center;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-weight:700;font-size:1.1rem;color:var(--accent)">💳 RIDEHACK'26 Campus Subscriptions</div>
+        <div class="faint small">Annual SaaS licensing status across consortium nodes</div>
+      </div>
+      <div class="row" style="gap:1.5rem">
+        <div style="text-align:center">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--green, #10B981)">{{ stats.sub_active }}</div>
+          <div class="faint small">Active Licenses</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--gold, #F59E0B)">{{ stats.sub_expiring }}</div>
+          <div class="faint small">Expiring Soon (≤30d)</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--red, #EF4444)">{{ stats.sub_expired }}</div>
+          <div class="faint small">Expired / Inactive</div>
+        </div>
+        <div>
+          <a href="{{ url_for('admin.institutions') }}" class="btn btn-ghost btn-sm" style="margin-top:.25rem">Manage Plans →</a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -58,7 +85,8 @@
               <td class="faint">{{ inst.created_at|date }}</td>
               <td>
                 <form method="post" action="{{ url_for('admin.approve_institution', inst_id=inst.id) }}" style="display:inline">
-                  <button class="btn btn-primary btn-sm" type="submit">Approve</button>
+                  <input type="hidden" name="subscription_plan" value="annual">
+                  <button class="btn btn-primary btn-sm" type="submit">✅ Approve</button>
                 </form>
               </td>
             </tr>
@@ -66,31 +94,28 @@
           </tbody>
         </table>
       {% else %}
-        <p class="faint small" style="margin:0">No pending institutions 🎉</p>
+        <p class="faint small" style="margin:0">No institutions pending approval.</p>
       {% endif %}
-      <a href="{{ url_for('admin.institutions') }}" class="btn btn-ghost btn-sm" style="align-self:flex-start">View All →</a>
     </div>
 
     {# ── Recent Users ── #}
     <div class="card stack" style="gap:1rem">
       <h3 style="margin:0">👤 Recent Registrations</h3>
       <table class="table" style="font-size:.85rem">
-        <thead><tr><th>Username</th><th>Role</th><th>Joined</th><th>Active</th></tr></thead>
+        <thead><tr><th>User</th><th>Role</th><th>Registered</th></tr></thead>
         <tbody>
           {% for u in recent_users %}
           <tr>
-            <td>{{ u.username }}</td>
-            <td><span class="badge-role">{{ u.role }}</span></td>
-            <td class="faint">{{ u.created_at|date }}</td>
             <td>
-              {% if u.is_active %}<span class="badge badge-valid" style="font-size:.75rem">Yes</span>
-              {% else %}<span class="badge badge-revoked" style="font-size:.75rem">No</span>{% endif %}
+              <b>{{ u.display_name }}</b>
+              <span class="faint small">(@{{ u.username }})</span>
             </td>
+            <td><span class="badge" style="font-size:.75rem">{{ u.role }}</span></td>
+            <td class="faint">{{ u.created_at|date }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-      <a href="{{ url_for('admin.users') }}" class="btn btn-ghost btn-sm" style="align-self:flex-start">View All →</a>
     </div>
 
   </div>

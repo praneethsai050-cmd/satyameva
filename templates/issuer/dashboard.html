@@ -9,7 +9,20 @@
     <canvas class="hero-canvas" data-hero3d aria-hidden="true"></canvas>
 
     <div class="hero-body">
-      <span class="hero-kicker">🏛️ Issuer Portal</span>
+      <div class="row row-between" style="align-items:center;flex-wrap:wrap">
+        <span class="hero-kicker">🏛️ Issuer Portal</span>
+        {% if current_user.institution %}
+          {% if current_user.institution.subscription_is_active %}
+            <span class="badge badge-valid" style="font-size:.78rem">
+              ✅ Campus License: {{ (current_user.institution.subscription_plan or 'annual')|upper }} ({{ current_user.institution.subscription_days_left }}d left)
+            </span>
+          {% else %}
+            <span class="badge badge-revoked" style="font-size:.78rem">
+              ⚠️ Campus Subscription Expired (Issuance Locked)
+            </span>
+          {% endif %}
+        {% endif %}
+      </div>
       <h1>Issue &amp; manage <em>credentials</em></h1>
       <p class="hero-lead">
         {{ current_user.organization or current_user.display_name }}<br>
@@ -23,6 +36,12 @@
         </a>
         <a class="btn btn-ghost" href="{{ url_for('issuer.bulk_issue') }}">
           <span aria-hidden="true">📑</span> Bulk Issue (CSV)
+        </a>
+        <a class="btn btn-ghost" href="{{ url_for('issuer.students') }}">
+          <span aria-hidden="true">👥</span> Manage Students
+        </a>
+        <a class="btn btn-ghost" href="{{ url_for('issuer.requests') }}">
+          <span aria-hidden="true">📬</span> Requests
         </a>
         <span class="chain-status">
           <span aria-hidden="true">🔗</span>
