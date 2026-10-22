@@ -28,3 +28,12 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Presentations, Pitch Decks & Non-Code Documents (Keep repository strictly clean code)
+*.pdf
+*.pptx
+*.ppt
+*.key
+*.odp
+*.docx
+*.doc
