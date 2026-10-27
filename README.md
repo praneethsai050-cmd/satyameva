@@ -181,7 +181,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "satyameva-aegis": {
       "command": "python",
-      "args": ["c:/Users/hp/OneDrive/Desktop/Satyameva/mcp_server.py"],
+      "args": [xyz],
       "env": {"PYTHONIOENCODING": "utf-8"}
     }
   }
@@ -289,22 +289,6 @@ docker-compose logs -f
 docker-compose down
 ```
 Access the application on port **`5000`** (`http://localhost:5000`).
-
----
-
-## 🔑 Production Roles & Portal Credentials
-
-The application is configured with 4 dedicated, segregated portals:
-
-| Portal / Role | Username / Identifier | Password | Direct Route | Operational Scope & Features |
-| :--- | :--- | :--- | :--- | :--- |
-| 🛡️ **Superadmin** | `superadmin` *(or `superadmin@satyameva.in`)* | `Satyameva@2026` | `/admin/` | Platform overseer: Multi-campus governance, subscription & license validity, PoW difficulty tuning, node health, fraud telemetry. |
-| 🏛️ **University Issuer** | `juit.registrar` *(or `registrar@juit.ac.in`)* | `Juit@2026` | `/issuer/` | **Jaypee University of Information Technology (JUIT)**: Bulk CSV issuance, automated Gemini AI parsing, block mining, approving student account registrations. |
-| 🎓 **Student Portal & Wallet** | `praneeth` *(or roll `22103050` / Google OAuth)* | `Praneeth@2026` | `/student/dashboard` | **Praneeth Sai (B.Tech CSE, 2026–2030 @ JUIT)**: 6 verified JUIT credentials, 3D WebGL holographic inspector, 60s dynamic QR, **AES-256 PDF Password: `01092008`**. |
-| 🔍 **Corporate Verifier** | `verifier` *(or `verifier@corporate.in`)* | `Verifier@2026` | `/verifier/dashboard` | **Corporate Background Verifications Ltd.**: Instant cryptographic verification in <5s, batch verifications, audit logs, and forensic audit PDF exports. |
-| 🌐 **Public Verifier** | *(Zero-Login Required)* | *(None)* | `/verify` | Frictionless verification for global employers, HR agencies, and embassies worldwide. |
-
-> **Security Note:** Sessions automatically terminate after **5 minutes of idle time** with a live visual countdown pill in the navigation header to enforce zero-trust workstation security.
 
 ---
 
