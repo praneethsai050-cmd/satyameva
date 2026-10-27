@@ -291,7 +291,7 @@
     footer.style.backdropFilter = 'blur(10px)';
     footer.style.pointerEvents = 'none';
     footer.style.zIndex = '20';
-    footer.textContent = '🖱️ Click & Drag to inspect 360° · Scroll wheel to Zoom · Move cursor to glint gold holographic foil';
+    footer.textContent = '🖱️ Click & Drag to inspect 360° · Scroll wheel to Zoom · Clean High-Contrast Audit View';
     modal.appendChild(footer);
 
     document.body.appendChild(modal);
@@ -311,15 +311,19 @@
     canvasHost.appendChild(renderer.domElement);
     currentRenderer = renderer;
 
-    // Lights
-    var ambient = new THREE.AmbientLight(0xffffff, 0.85);
+    // Balanced Studio Lights (Diffuse, zero-glare, high text readability)
+    var ambient = new THREE.AmbientLight(0xffffff, 1.15);
     scene.add(ambient);
 
-    var movingLight = new THREE.PointLight(0xffffff, 2.5, 50);
-    movingLight.position.set(5, 8, 15);
-    scene.add(movingLight);
+    var frontKeyLight = new THREE.DirectionalLight(0xffffff, 0.65);
+    frontKeyLight.position.set(10, 15, 20);
+    scene.add(frontKeyLight);
 
-    var rimLight = new THREE.DirectionalLight((campus === 'juit') ? 0x10b981 : 0x00f2fe, 1.2);
+    var backKeyLight = new THREE.DirectionalLight(0xffffff, 0.65);
+    backKeyLight.position.set(-10, 15, -20);
+    scene.add(backKeyLight);
+
+    var rimLight = new THREE.DirectionalLight((campus === 'juit') ? 0x10b981 : 0x00f2fe, 0.45);
     rimLight.position.set(-15, -10, 8);
     scene.add(rimLight);
 
@@ -332,17 +336,16 @@
     var cardH = 12.72; // A4 aspect
     var cardGeo = new THREE.BoxGeometry(cardW, cardH, 0.12);
 
-    var edgeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+    var edgeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.1 });
     var frontMat = new THREE.MeshStandardMaterial({
       map: frontTex,
-      metalness: 0.25,
-      roughness: 0.35,
-      bumpScale: 0.05
+      metalness: 0.05,
+      roughness: 0.85
     });
     var backMat = new THREE.MeshStandardMaterial({
       map: backTex,
-      metalness: 0.35,
-      roughness: 0.25
+      metalness: 0.05,
+      roughness: 0.85
     });
 
     // Box materials array: [right, left, top, bottom, front, back]
@@ -388,12 +391,6 @@
     window.addEventListener('mouseup', function() { isDragging = false; });
 
     canvasHost.addEventListener('mousemove', function(e) {
-      // Move specular light to track cursor
-      var normX = (e.clientX / window.innerWidth) * 2 - 1;
-      var normY = -(e.clientY / window.innerHeight) * 2 + 1;
-      movingLight.position.x = normX * 18;
-      movingLight.position.y = normY * 18;
-
       if (isDragging) {
         var dx = e.clientX - prevX;
         var dy = e.clientY - prevY;

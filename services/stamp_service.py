@@ -189,6 +189,20 @@ def build_certificate_page(doc, student, verify_url: str, campus_code: str | Non
     draw.text((70, 84), 'Cryptographic Proof of Authenticity', font=f_body,
               fill=(190, 198, 230))
 
+    # Official Institutional Campus Logo on Certificate Header
+    import os
+    c_code = (campus_code or 'JUIT').lower()
+    logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'img', 'campuses', f'{c_code}.png')
+    if os.path.exists(logo_path):
+        try:
+            c_logo = Image.open(logo_path).convert('RGB')
+            c_logo = c_logo.resize((104, 104), Image.LANCZOS)
+            logo_box = [PAGE_W - 70 - 110, 14, PAGE_W - 70, 14 + 110]
+            _rounded(draw, logo_box, 10, fill=(255, 255, 255), outline=INDIGO, width=2)
+            page.paste(c_logo, (PAGE_W - 70 - 107, 17))
+        except Exception:
+            pass
+
     y = header_h + 54
 
     # ---- Verified banner ----
@@ -298,61 +312,103 @@ def generate_stamped_pdf(doc, student, verify_url: str, campus_code: str | None 
     """
     Build the downloadable stamped PDF.
 
-    Page 1 is the original document with the seal composited on (when the
-    upload is an image); the verification certificate always follows, so the
-    file is useful even for PDF or file-less credentials.
-    """
-    pages: list[Image.Image] = []
+    If the uploaded file is a PDF:
+      Merges the original PDF with the high-resolution Satyameva Cryptographic Verification
+      Certificate page (complete with seal, SHA-256 Merkle root, PoW block proof, and verification QR).
+    If the uploaded file is an image:
+      Page 1 has the official pressed verification seal composited onto the original image,
+      followed by the certificate page.
+    If no file was attached:
+      Produces the standalone verification certificate page.
 
+    The final PDF is cryptographically secured with AES-256 encryption using the student's
+    date of birth (DOB) as the password when available.
+    """
+    clean_pw = str(password).strip() if password else None
+    cert_page = build_certificate_page(doc, student, verify_url, campus_code=campus_code)
+    cert_buf = BytesIO()
+    cert_page.save(cert_buf, format='PDF', resolution=150.0)
+    cert_pdf_bytes = cert_buf.getvalue()
+
+    # Case 1: Uploaded document is a PDF
+    if doc.file_data and (doc.file_mime == 'application/pdf' or doc.file_data.startswith(b'%PDF')):
+        try:
+            import pikepdf
+            with pikepdf.open(BytesIO(doc.file_data)) as orig_pdf:
+                with pikepdf.open(BytesIO(cert_pdf_bytes)) as cert_pdf:
+                    orig_pdf.pages.extend(cert_pdf.pages)
+                    merged_buf = BytesIO()
+                    if clean_pw:
+                        orig_pdf.save(
+                            merged_buf,
+                            encryption=pikepdf.Encryption(
+                                owner=clean_pw + '_satyameva_owner',
+                                user=clean_pw,
+                                R=6
+                            )
+                        )
+                    else:
+                        orig_pdf.save(merged_buf)
+                    return merged_buf.getvalue()
+        except Exception:
+            # Fallback if original PDF has restrictions or cannot be parsed
+            pass
+
+    # Case 2: Uploaded document is an image (PNG, JPG, WEBP)
+    pages: list[Image.Image] = []
     if doc.file_data and doc.is_previewable_image:
         try:
             original = Image.open(BytesIO(doc.file_data))
             original.load()
             pages.append(stamp_image(original, doc.doc_hash, doc.stamp_date or doc.issued_on))
         except Exception:
-            # A corrupt or unsupported upload must not block the download —
-            # the certificate page below still proves the credential.
             pass
 
-    pages.append(build_certificate_page(doc, student, verify_url, campus_code=campus_code))
-
+    pages.append(cert_page)
     buffer = BytesIO()
-    pages[0].save(buffer, format='PDF', save_all=True,
-                  append_images=pages[1:], resolution=150.0)
+    pages[0].save(buffer, format='PDF', save_all=True, append_images=pages[1:], resolution=150.0)
     raw_pdf = buffer.getvalue()
 
-    if password:
-        clean_pw = str(password).strip()
-        if clean_pw:
-            try:
-                import pikepdf
-                encrypted_buf = BytesIO()
-                with pikepdf.open(BytesIO(raw_pdf)) as pdf_doc:
-                    pdf_doc.save(
-                        encrypted_buf,
-                        encryption=pikepdf.Encryption(
-                            owner=clean_pw + '_satyameva_owner',
-                            user=clean_pw,
-                            R=6
-                        )
+    if clean_pw:
+        try:
+            import pikepdf
+            encrypted_buf = BytesIO()
+            with pikepdf.open(BytesIO(raw_pdf)) as pdf_doc:
+                pdf_doc.save(
+                    encrypted_buf,
+                    encryption=pikepdf.Encryption(
+                        owner=clean_pw + '_satyameva_owner',
+                        user=clean_pw,
+                        R=6
                     )
-                return encrypted_buf.getvalue()
-            except Exception:
-                pass
+                )
+            return encrypted_buf.getvalue()
+        except Exception:
+            pass
+
     return raw_pdf
 
 
 def generate_stamped_image(doc) -> bytes | None:
-    """Stamped PNG of the original upload, or None when there is no image."""
-    if not (doc.file_data and doc.is_previewable_image):
-        return None
+    """Stamped PNG of the original upload, or the certificate page if upload is a PDF."""
+    if doc.file_data and doc.is_previewable_image:
+        try:
+            original = Image.open(BytesIO(doc.file_data))
+            original.load()
+            stamped = stamp_image(original, doc.doc_hash, doc.stamp_date or doc.issued_on)
+            buffer = BytesIO()
+            stamped.save(buffer, format='PNG')
+            return buffer.getvalue()
+        except Exception:
+            pass
+
     try:
-        original = Image.open(BytesIO(doc.file_data))
-        original.load()
+        from routes.student_routes import _get_doc_campus_code, _verify_url
+        campus_code = _get_doc_campus_code(doc, doc.student)
+        verify_url, _ = _verify_url(doc, with_token=False)
+        cert_page = build_certificate_page(doc, doc.student, verify_url, campus_code=campus_code)
+        buffer = BytesIO()
+        cert_page.save(buffer, format='PNG')
+        return buffer.getvalue()
     except Exception:
         return None
-
-    stamped = stamp_image(original, doc.doc_hash, doc.stamp_date or doc.issued_on)
-    buffer = BytesIO()
-    stamped.save(buffer, format='PNG')
-    return buffer.getvalue()

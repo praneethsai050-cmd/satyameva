@@ -14,10 +14,12 @@
 
     <div class="hero-glass-card">
       <a class="brand" href="{{ url_for('public.verify') }}" style="margin-bottom:1.5rem">
-        <span class="brand-cube" aria-hidden="true"><i></i></span>
+        <span class="brand-logo-frame" style="width:44px; height:44px; border-radius:12px; padding:3px">
+          <img src="{{ url_for('static', filename='img/campuses/' + (current_campus or 'juit') + '.png') }}" alt="{{ campus_code }} Logo" class="brand-logo-img">
+        </span>
         <span>
-          <span class="brand-name" style="font-size:1.4rem">{{ brand }}</span>
-          <span class="brand-sub">{{ tagline }}</span>
+          <span class="brand-name" style="font-size:1.4rem">{{ brand }} <span class="badge" style="font-size:.68rem;vertical-align:middle;padding:.15rem .45rem;border-radius:99px;border:1px solid var(--border)">{{ campus_code }}</span></span>
+          <span class="brand-sub">{{ campus_name }} · {{ tagline }}</span>
         </span>
       </a>
 
@@ -59,6 +61,15 @@
   <section class="login-card" style="justify-self:center">
     <div class="stack stack-6">
       <div>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+          <span class="brand-logo-frame" style="width:34px;height:34px;border-radius:8px">
+            <img src="{{ url_for('static', filename='img/campuses/' + (current_campus or 'juit') + '.png') }}" alt="{{ campus_code }}" class="brand-logo-img">
+          </span>
+          <div>
+            <b style="font-size:.95rem;color:#fff">{{ campus_name }}</b>
+            <div class="tiny faint" style="font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em">Official {{ campus_code }} Gateway</div>
+          </div>
+        </div>
         <span class="hero-kicker">🔐 Secure sign-in</span>
         <h2 style="margin-top:.75rem">Welcome back</h2>
         <p class="muted small" style="margin:.4rem 0 0">
@@ -75,7 +86,7 @@
           <label class="field-label" for="identifier">Username or email</label>
           <input class="input" id="identifier" name="identifier" type="text"
                  autocomplete="username" required autofocus
-                 placeholder="admin, roll number, or email">
+                 placeholder="Username, roll number, or email">
         </div>
 
         <div>

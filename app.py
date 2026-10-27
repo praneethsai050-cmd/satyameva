@@ -26,11 +26,13 @@ PUBLIC_ENDPOINTS = {
 }
 
 
-def create_app(config_name: str | None = None) -> Flask:
+def create_app(config_name: str | None = None, test_config: dict | None = None) -> Flask:
     config_name = config_name or os.environ.get('SATYAMEVA_ENV', 'default')
 
     app = Flask(__name__)
     app.config.from_object(config_by_name.get(config_name, config_by_name['default']))
+    if test_config:
+        app.config.update(test_config)
 
     # SQLite needs its parent directory to exist before the first connect.
     os.makedirs(os.path.join(BASE_DIR, 'instance'), exist_ok=True)
@@ -140,25 +142,76 @@ def _register_template_helpers(app: Flask) -> None:
             from services.notification_service import unread_count
             alert_cnt = unread_count(current_user.student, current_user.student.documents)
 
-        campus = 'jiit'
-        campus_name = 'JIIT Noida'
-        campus_code = 'JIIT'
+        campus = 'juit'
+        campus_name = 'JUIT Waknaghat'
+        campus_code = 'JUIT'
+
+        # Multi-Campus institutional signals
+        signals = []
         if getattr(current_user, 'is_authenticated', False):
+            # 1. Direct institution link
             inst = getattr(current_user, 'institution', None)
-            code = (inst.short_code if inst else '').upper()
-            org = (getattr(current_user, 'organization', '') or '').upper()
-            if 'JUIT' in code or 'JUIT' in org or 'WAKNAGHAT' in org:
-                campus = 'juit'
-                campus_name = 'JUIT Waknaghat'
-                campus_code = 'JUIT'
-            elif 'JUET' in code or 'JUET' in org or 'GUNA' in org:
-                campus = 'juet'
-                campus_name = 'JUET Guna'
-                campus_code = 'JUET'
-            elif 'JIIT' in code or 'JIIT' in org or 'NOIDA' in org:
-                campus = 'jiit'
-                campus_name = 'JIIT Noida'
-                campus_code = 'JIIT'
+            if inst:
+                signals.append(getattr(inst, 'short_code', ''))
+                signals.append(getattr(inst, 'name', ''))
+
+            # 2. User organization and email
+            signals.append(getattr(current_user, 'organization', '') or '')
+            signals.append(getattr(current_user, 'email', '') or '')
+
+            # 3. Student profile & issued credentials
+            student = getattr(current_user, 'student', None)
+            if student:
+                signals.append(getattr(student, 'institution', '') or '')
+                signals.append(getattr(student, 'department', '') or '')
+                signals.append(getattr(student, 'program', '') or '')
+                for doc in getattr(student, 'documents', []):
+                    signals.append(getattr(doc, 'issuer_name', '') or '')
+                    if doc.issuer and getattr(doc.issuer, 'institution', None):
+                        signals.append(getattr(doc.issuer.institution, 'short_code', '') or '')
+                        signals.append(getattr(doc.issuer.institution, 'name', '') or '')
+
+                # Auto-heal student user institution link if missing
+                if current_user.institution_id is None:
+                    from models.institution import Institution
+                    s_inst_str = (student.institution or '').upper()
+                    t_inst = None
+                    if any(k in s_inst_str for k in ['JUIT', 'WAKNAGHAT', 'SOLAN', 'UNIVERSITY OF INFORMATION']):
+                        t_inst = Institution.query.filter_by(short_code='JUIT').first()
+                    elif any(k in s_inst_str for k in ['JUET', 'GUNA', 'ENGINEERING']):
+                        t_inst = Institution.query.filter_by(short_code='JUET').first()
+                    elif any(k in s_inst_str for k in ['JIIT', 'NOIDA', 'INSTITUTE OF INFORMATION']):
+                        t_inst = Institution.query.filter_by(short_code='JIIT').first()
+                    if t_inst:
+                        try:
+                            current_user.institution_id = t_inst.id
+                            current_user.organization = t_inst.name
+                            from extensions import db
+                            db.session.commit()
+                        except Exception:
+                            from extensions import db
+                            db.session.rollback()
+
+        from flask import has_request_context
+        if has_request_context():
+            req_c = request.args.get('campus') or session.get('campus')
+            if req_c:
+                signals.append(str(req_c))
+
+        blob = ' '.join(str(s).upper() for s in signals if s)
+
+        if any(k in blob for k in ['JUIT', 'WAKNAGHAT', 'SOLAN', 'HIMACHAL', 'UNIVERSITY OF INFORMATION']):
+            campus = 'juit'
+            campus_name = 'JUIT Waknaghat'
+            campus_code = 'JUIT'
+        elif any(k in blob for k in ['JUET', 'GUNA', 'RAGHOGARH', 'ENGINEERING AND TECHNOLOGY', 'ENGINEERING & TECHNOLOGY']):
+            campus = 'juet'
+            campus_name = 'JUET Guna'
+            campus_code = 'JUET'
+        elif any(k in blob for k in ['JIIT', 'NOIDA', 'INSTITUTE OF INFORMATION']):
+            campus = 'jiit'
+            campus_name = 'JIIT Noida'
+            campus_code = 'JIIT'
 
         return {
             'brand': app.config['INSTITUTION_NAME'],

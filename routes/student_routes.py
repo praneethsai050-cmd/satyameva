@@ -61,23 +61,23 @@ def _get_doc_campus_code(doc: Doc, student: Student | None = None) -> str:
 
     # 2. From Issuer display name
     issuer_name = (doc.issuer_name or '').upper()
-    if 'JIIT' in issuer_name or 'NOIDA' in issuer_name:
-        return 'JIIT'
-    if 'JUIT' in issuer_name or 'WAKNAGHAT' in issuer_name or 'SOLAN' in issuer_name:
+    if 'JUIT' in issuer_name or 'WAKNAGHAT' in issuer_name or 'SOLAN' in issuer_name or 'UNIVERSITY OF INFORMATION' in issuer_name:
         return 'JUIT'
-    if 'JUET' in issuer_name or 'GUNA' in issuer_name:
+    if 'JUET' in issuer_name or 'GUNA' in issuer_name or 'ENGINEERING' in issuer_name:
         return 'JUET'
+    if 'JIIT' in issuer_name or 'NOIDA' in issuer_name or 'INSTITUTE OF INFORMATION' in issuer_name:
+        return 'JIIT'
 
     # 3. From Student's assigned institution
     student_inst = ((student.institution if student else None) or '').upper()
-    if 'JIIT' in student_inst:
-        return 'JIIT'
-    if 'JUIT' in student_inst:
+    if 'JUIT' in student_inst or 'WAKNAGHAT' in student_inst or 'SOLAN' in student_inst or 'UNIVERSITY OF INFORMATION' in student_inst:
         return 'JUIT'
-    if 'JUET' in student_inst:
+    if 'JUET' in student_inst or 'GUNA' in student_inst:
         return 'JUET'
+    if 'JIIT' in student_inst or 'NOIDA' in student_inst or 'INSTITUTE OF INFORMATION' in student_inst:
+        return 'JIIT'
 
-    return 'JIIT'
+    return 'JUIT'
 
 
 def _verify_url(doc: Doc, with_token: bool = False) -> tuple[str, int | None]:
@@ -234,7 +234,22 @@ def download_stamped(doc_id):
 
     campus_code = _get_doc_campus_code(doc, student)
     permanent_url, _ = _verify_url(doc, with_token=False)
-    pdf_bytes = generate_stamped_pdf(doc, student, permanent_url, campus_code=campus_code)
+    dob_pwd = None
+    if student.dob:
+        parts = str(student.dob).split('-')
+        if len(parts) == 3:
+            dob_pwd = f"{parts[2]}{parts[1]}{parts[0]}"
+        else:
+            import re
+            dob_pwd = re.sub(r'[^0-9]', '', str(student.dob))
+
+    pdf_bytes = generate_stamped_pdf(
+        doc,
+        student,
+        permanent_url,
+        campus_code=campus_code,
+        password=dob_pwd
+    )
 
     safe_roll = (student.roll_number or 'student').replace('/', '-').replace('\\', '-')
     filename = f'Satyameva_{campus_code}_{doc.doc_type}_{safe_roll}.pdf'

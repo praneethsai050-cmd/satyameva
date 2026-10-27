@@ -36,19 +36,18 @@ class ChallengeCSVTestCase(unittest.TestCase):
         self.temp_db_path = os.path.join(self.temp_dir, 'challenge.db')
         self.temp_chain_path = os.path.join(self.temp_dir, 'blockchain.json')
 
-        self.app = create_app()
-        self.app.config.update({
+        self.orig_storage = blockchain_instance.storage_file
+        self.orig_diff = blockchain_instance.difficulty
+        blockchain_instance.storage_file = self.temp_chain_path
+        blockchain_instance.difficulty = 1
+
+        self.app = create_app(test_config={
             'TESTING': True,
             'WTF_CSRF_ENABLED': False,
             'MAIL_SUPPRESS_SEND': True,
             'SQLALCHEMY_DATABASE_URI': f'sqlite:///{self.temp_db_path}',
             'POW_DIFFICULTY': 1,
         })
-
-        self.orig_storage = blockchain_instance.storage_file
-        self.orig_diff = blockchain_instance.difficulty
-        blockchain_instance.storage_file = self.temp_chain_path
-        blockchain_instance.difficulty = 1
 
         self.ctx = self.app.app_context()
         self.ctx.push()
@@ -63,7 +62,14 @@ class ChallengeCSVTestCase(unittest.TestCase):
     def tearDown(self):
         self.email_patcher.stop()
         db.session.remove()
-        db.drop_all()
+        try:
+            db.drop_all()
+        except Exception:
+            pass
+        try:
+            db.engine.dispose()
+        except Exception:
+            pass
         self.ctx.pop()
 
         blockchain_instance.storage_file = self.orig_storage

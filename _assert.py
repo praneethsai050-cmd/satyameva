@@ -70,14 +70,14 @@ want(f'log grew by the number of checks ({after - before} new rows)', after > be
 
 print('\n── login / RBAC ────────────────────────────────────────────────')
 want('bad password rejected',
-     b'Signed in' not in c.post('/login', data={'identifier': 'aarav.sharma',
+     b'Signed in' not in c.post('/login', data={'identifier': 'praneeth',
                                                 'password': 'wrong'}).data)
-r = c.post('/login', data={'identifier': 'aarav.sharma', 'password': 'satyameva123'})
+r = c.post('/login', data={'identifier': 'praneeth', 'password': 'Praneeth@2026'})
 want('good password -> /student/dashboard', r.headers.get('Location') == '/student/dashboard')
 
 d = c.get('/student/dashboard').get_data(as_text=True)
-want('dashboard greets the student', 'Aarav' in d)
-want('dashboard shows only own docs', '/student/document/7' not in d)
+want('dashboard greets the student', 'Praneeth' in d)
+want('dashboard shows only own docs', '/student/document/999' not in d)
 want('dashboard has the 3D hero canvas', 'data-hero3d' in d)
 want('dashboard cards are tiltable', d.count('data-tilt') >= 5)
 want('odometer counters seeded', 'data-count' in d)
@@ -98,13 +98,13 @@ want('detail shows the full 64-char hash', valid.doc_hash in det)
 
 print('\n── issuer/verifier cannot reach the student portal ──────────────')
 c2 = app.test_client()
-c2.post('/login', data={'identifier': 'jiit.registrar', 'password': 'satyameva123'})
-want('issuer blocked from student dashboard',
-     c2.get('/student/dashboard').status_code in (302, 403))
+c2.post('/login', data={'identifier': 'juit.registrar', 'password': 'Juit@2026'})
+want('issuer blocked from student dashboard (403)',
+     c2.get('/student/dashboard').status_code == 403)
 
 print('\n── 5-minute idle timeout ───────────────────────────────────────')
 c3 = app.test_client()
-c3.post('/login', data={'identifier': 'aarav.sharma', 'password': 'satyameva123'})
+c3.post('/login', data={'identifier': 'praneeth', 'password': 'Praneeth@2026'})
 want('session alive immediately', c3.get('/student/dashboard').status_code == 200)
 with c3.session_transaction() as s:
     s['last_active'] = time.time() - (app.config['SESSION_TIMEOUT_SECONDS'] + 1)

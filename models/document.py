@@ -10,15 +10,18 @@ from extensions import db, utcnow
 
 # doc_type -> (label, emoji, default validity in days)
 #
-# Validity mirrors real Indian academic practice: a transfer certificate is a
-# short-lived instrument, a degree is effectively permanent.
+# Academic credentials on the blockchain carry permanent lifetime validity (None = Never expires).
 DOC_TYPES = {
-    'DEGREE':     ('Degree Certificate',     '🎓', 3650),
-    'MARKSHEET':  ('Marksheet',              '📊', 3650),
-    'TC':         ('Transfer Certificate',   '📄', 180),
-    'MIGRATION':  ('Migration Certificate',  '✈️', 365),
-    'BONAFIDE':   ('Bonafide Certificate',   '🏛️', 90),
-    'INTERNSHIP': ('Internship Certificate', '💼', 730),
+    'DEGREE':                 ('Degree Certificate',                   '🎓', None),
+    'MARKSHEET':              ('University Marksheet',                 '📊', None),
+    'CBSE_MARKSHEET':         ('CBSE Board Marksheet (Class X / XII)', '📜', None),
+    'ICSE_MARKSHEET':         ('ICSE / ISC Board Marksheet',           '📜', None),
+    'STATE_BOARD_MARKSHEET':  ('State Board Marksheet',                '📜', None),
+    'DIPLOMA':                ('Diploma Certificate',                  '📜', None),
+    'TC':                     ('Transfer Certificate',                 '📄', None),
+    'MIGRATION':              ('Migration Certificate',                '✈️', None),
+    'BONAFIDE':               ('Bonafide Certificate',                 '🏛️', None),
+    'INTERNSHIP':             ('Internship Certificate',               '💼', None),
 }
 
 STATUS_VALID = 'VALID'
@@ -27,8 +30,9 @@ STATUS_EXPIRED = 'EXPIRED'
 STATUS_REVOKED = 'REVOKED'
 
 
-def default_validity_days(doc_type: str) -> int:
-    return DOC_TYPES.get((doc_type or '').upper(), (None, None, 365))[2]
+def default_validity_days(doc_type: str) -> int | None:
+    entry = DOC_TYPES.get((doc_type or '').upper())
+    return entry[2] if entry else None
 
 
 class Doc(db.Model):
@@ -157,10 +161,13 @@ class Doc(db.Model):
         return self.file_mime == 'application/pdf'
 
     def set_validity(self, days: int | None = None) -> None:
-        """Apply the type's default validity window unless told otherwise."""
+        """Apply the type's default validity window unless told otherwise. None = permanent / never expires."""
         if days is None:
             days = default_validity_days(self.doc_type)
-        self.valid_until = (self.issued_on or utcnow()) + timedelta(days=days)
+        if days is None or days <= 0:
+            self.valid_until = None
+        else:
+            self.valid_until = (self.issued_on or utcnow()) + timedelta(days=days)
 
     def __repr__(self) -> str:
         return f'<Doc {self.doc_type} {self.doc_hash[:12]} ({self.status})>'

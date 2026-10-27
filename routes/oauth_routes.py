@@ -64,9 +64,16 @@ def _get_oauth():
 
 def _find_or_create_oauth_user(provider: str, sub: str, email: str, name: str) -> User | None:
     """Find existing user by OAuth sub or email, or create a new student account."""
+    from models.institution import Institution
+    juit_inst = Institution.query.filter_by(short_code='JUIT').first()
+
     # 1. Exact match on provider + sub (most reliable)
     user = User.query.filter_by(oauth_provider=provider, oauth_sub=sub).first()
     if user:
+        if not user.institution_id and juit_inst:
+            user.institution_id = juit_inst.id
+            user.organization = juit_inst.name
+            db.session.commit()
         return user
 
     # 2. Match on email (user may have registered with password first)
@@ -75,6 +82,9 @@ def _find_or_create_oauth_user(provider: str, sub: str, email: str, name: str) -
         # Link this OAuth provider to their existing account
         user.oauth_provider = provider
         user.oauth_sub = sub
+        if not user.institution_id and juit_inst:
+            user.institution_id = juit_inst.id
+            user.organization = juit_inst.name
         db.session.commit()
         return user
 
@@ -115,7 +125,7 @@ def _find_or_create_oauth_user(provider: str, sub: str, email: str, name: str) -
                 user_id=user.id,
                 full_name=name or email.split('@')[0],
                 roll_number=email.split('@')[0].upper(),
-                institution='Jaypee Institute of Information Technology',
+                institution='Jaypee University of Information Technology',
             )
             db.session.add(student)
 

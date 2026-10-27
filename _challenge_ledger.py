@@ -70,17 +70,19 @@ from services.verification_service import verify_hash
 
 class AdversarialTestRunner:
     def __init__(self):
-        self.app = create_app()
-        self.app.config.update({
+        self.orig_storage = blockchain_instance.storage_file
+        self.orig_diff = blockchain_instance.difficulty
+        blockchain_instance.storage_file = test_json_file
+        blockchain_instance.difficulty = 2
+
+        self.app = create_app(test_config={
             'TESTING': True,
             'WTF_CSRF_ENABLED': False,
             'MAIL_SUPPRESS_SEND': True,
+            'SQLALCHEMY_DATABASE_URI': f'sqlite:///{test_db_file}',
             'POW_DIFFICULTY': 2,
             'SERVER_NAME': 'localhost',
         })
-        
-        blockchain_instance.storage_file = test_json_file
-        blockchain_instance.difficulty = 2
         
         self.passed_tests = []
         self.failed_tests = []
@@ -724,6 +726,13 @@ class AdversarialTestRunner:
 
         except Exception as e:
             self.log_fail("VECTOR 5 (Stress & Advanced Vectors)", e)
+        finally:
+            blockchain_instance.storage_file = self.orig_storage
+            blockchain_instance.difficulty = self.orig_diff
+            os.environ.pop('DATABASE_URL', None)
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+        return len(self.failed_tests) == 0
 
 
 if __name__ == '__main__':

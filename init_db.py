@@ -5,7 +5,7 @@ Initializes a clean production environment:
 1. Resets all database tables.
 2. Ensures Genesis Block #0 on the cryptographic ledger.
 3. Pre-approves the 3 official Jaypee institutions (JIIT Noida, JUIT Waknaghat, JUET Guna).
-4. Creates the official Master Administrator account from .env (default: admin / Satyameva@2026).
+4. Creates the official Master Administrator account from .env (default: superadmin / Satyameva@2026).
 5. Zero dummy users, zero fake credentials, zero fake verification logs.
 
 Run with:
@@ -81,8 +81,8 @@ def init_production_db():
         print('      - JUET Guna (MP)')
 
         # 3. Create Master Administrator Account
-        admin_user = os.environ.get('ADMIN_USERNAME', 'admin').strip()
-        admin_email = os.environ.get('ADMIN_EMAIL', 'hackathonsage@gmail.com').strip()
+        admin_user = os.environ.get('ADMIN_USERNAME', 'superadmin').strip()
+        admin_email = os.environ.get('ADMIN_EMAIL', 'superadmin@satyameva.in').strip()
         admin_pass = os.environ.get('ADMIN_PASSWORD', 'Satyameva@2026').strip()
 
         target_iterations = app.config.get('PASSWORD_ITERATIONS', 100000)

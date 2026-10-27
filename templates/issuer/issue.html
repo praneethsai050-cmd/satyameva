@@ -11,54 +11,94 @@
     <a href="{{ url_for('issuer.dashboard') }}" class="btn btn-ghost">← Back to Dashboard</a>
   </div>
 
-  <section class="panel" style="max-width: 640px;">
+  <section class="panel" style="max-width: 680px;">
 
-    {# ── AI Extraction Banner ── #}
-    <div id="ai-banner" class="card" style="background:linear-gradient(135deg,rgba(47,107,237,.15),rgba(47,107,237,.05));border:1px solid rgba(47,107,237,.35);margin-bottom:1.5rem;padding:1rem 1.25rem">
-      <div class="row" style="align-items:center;gap:.75rem;flex-wrap:wrap">
-        <span style="font-size:1.4rem">✨</span>
-        <div style="flex:1;min-width:160px">
-          <b style="font-size:.95rem">Auto-fill with Gemini AI</b>
-          <p class="small faint" style="margin:.15rem 0 0">Upload the document below, then click to let Gemini read and pre-fill the fields for you.</p>
-        </div>
-        <button type="button" id="ai-extract-btn" class="btn btn-primary btn-sm" onclick="runAIExtract()">
-          ✨ Extract Fields
-        </button>
-      </div>
-      <div id="ai-status" style="display:none;margin-top:.75rem;font-size:.85rem" class="faint"></div>
-    </div>
+    <form method="post" action="{{ url_for('issuer.issue') }}" enctype="multipart/form-data" class="stack stack-4" id="issue-form" novalidate>
 
-    <form method="post" action="{{ url_for('issuer.issue') }}" enctype="multipart/form-data" class="stack stack-4" novalidate>
-
-      <!-- Student Details -->
+      {# ── Primary Step: Upload & Instant Gemini OCR Extraction Zone ── #}
       <div class="stack stack-3">
-        <h3>Student Details</h3>
+        <div class="row row-between" style="align-items:center">
+          <h3 style="margin:0">1. Source Document</h3>
+          <span class="badge badge-cyber" style="font-size:0.72rem">✨ AUTO-FILL POWERED BY GEMINI 2.0 FLASH</span>
+        </div>
+
+        {# Drag & Drop Stage #}
+        <div id="drop-zone" style="border:2px dashed rgba(56, 189, 248, 0.45); background:rgba(15, 23, 42, 0.65); border-radius:14px; padding:2rem 1.5rem; text-align:center; cursor:pointer; transition:all 0.25s ease; position:relative">
+          <input type="file" id="document" name="document" class="sr-only" required accept=".png,.jpg,.jpeg,.pdf,.webp">
+          
+          <div id="drop-prompt">
+            <div style="font-size:2.4rem; margin-bottom:0.5rem">📄</div>
+            <div style="font-weight:700; font-size:1.05rem; color:#f1f2fb">Drag & Drop Document Here, or <span style="color:var(--accent,#38bdf8); text-decoration:underline">Browse</span></div>
+            <div class="small faint" style="margin-top:0.35rem">
+              PDF, PNG, JPG, JPEG, or WEBP (Max 16 MB).<br>
+              <strong>Gemini AI will automatically extract and fill all student & marksheet details upon upload.</strong>
+            </div>
+          </div>
+
+          {# File Selected Preview Pill #}
+          <div id="file-info" style="display:none; align-items:center; justify-content:center; gap:0.75rem; background:rgba(255,255,255,0.06); padding:0.6rem 1rem; border-radius:10px; margin-top:0.75rem">
+            <span style="font-size:1.2rem">📎</span>
+            <span id="file-name" style="font-weight:600; font-family:var(--mono); font-size:0.88rem; color:#38bdf8"></span>
+            <span id="file-size" class="tiny faint"></span>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="triggerFileSelect(event)" style="padding:0.2rem 0.5rem; font-size:0.75rem">Change</button>
+          </div>
+
+          {# Live AI Status Banner #}
+          <div id="ai-status" style="display:none; margin-top:1rem; padding:0.65rem 0.9rem; border-radius:8px; font-size:0.85rem; font-weight:500; background:rgba(15, 23, 42, 0.9); border:1px solid rgba(56,189,248,0.3)">
+            <span id="ai-status-text">Analyzing document with Gemini AI…</span>
+          </div>
+        </div>
+
+        {% if errors.get('document') %}
+          <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['document'] }}</div>
+        {% endif %}
+      </div>
+
+      <hr class="divider">
+
+      {# ── Student Details ── #}
+      <div class="stack stack-3">
+        <div class="row row-between" style="align-items:center">
+          <h3 style="margin:0">2. Student Details</h3>
+          <span class="tiny faint">Extracted automatically from file</span>
+        </div>
 
         <div>
-          <label class="field-label" for="roll_number">Roll Number *</label>
-          <input class="input" id="roll_number" name="roll_number" type="text" required placeholder="e.g. 22103045" value="{{ form.get('roll_number', '') }}">
+          <label class="field-label" for="roll_number">Roll / Registration Number *</label>
+          <input class="input" id="roll_number" name="roll_number" type="text" required placeholder="e.g. 22103050" value="{{ form.get('roll_number', '') }}">
           {% if errors.get('roll_number') %}
             <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['roll_number'] }}</div>
           {% endif %}
         </div>
 
         <div>
-          <label class="field-label" for="student_name">Student Name (Optional)</label>
-          <input class="input" id="student_name" name="student_name" type="text" placeholder="For verification purposes" value="{{ form.get('student_name', '') }}">
+          <label class="field-label" for="student_name">Student Full Legal Name</label>
+          <input class="input" id="student_name" name="student_name" type="text" placeholder="e.g. Praneeth Sai" value="{{ form.get('student_name', '') }}">
         </div>
 
-        <div>
-          <label class="field-label" for="student_email">Student Email Address (Recommended for Real-Time Alerts)</label>
-          <input class="input" id="student_email" name="student_email" type="email" placeholder="e.g. student@gmail.com" value="{{ form.get('student_email', '') }}">
-          <span class="tiny faint" style="display:block; margin-top:0.25rem">Instant issuance notifications and verification alerts from hackathonsage@gmail.com will be sent to this email.</span>
+        <div class="row" style="gap:1rem">
+          <div style="flex:1">
+            <label class="field-label" for="student_email">Student Email Address</label>
+            <input class="input" id="student_email" name="student_email" type="email" placeholder="e.g. student@gmail.com" value="{{ form.get('student_email', '') }}">
+            <span class="tiny faint" style="display:block; margin-top:0.25rem">Receives issuance confirmation &amp; blockchain QR code.</span>
+          </div>
+
+          <div style="flex:1">
+            <label class="field-label" for="dob">Date of Birth (DOB)</label>
+            <input class="input" id="dob" name="dob" type="text" placeholder="DDMMYYYY (e.g. 01092008)" value="{{ form.get('dob', '') }}">
+            <span class="tiny faint" style="display:block; margin-top:0.25rem">Used for AES-256 PDF encryption password.</span>
+          </div>
         </div>
       </div>
 
       <hr class="divider">
 
-      <!-- Document Details -->
+      {# ── Document Details ── #}
       <div class="stack stack-3">
-        <h3>Document Details</h3>
+        <div class="row row-between" style="align-items:center">
+          <h3 style="margin:0">3. Document Details</h3>
+          <span class="tiny faint">Board / University specifications</span>
+        </div>
 
         <div>
           <label class="field-label" for="doc_type">Document Type *</label>
@@ -75,7 +115,7 @@
 
         <div>
           <label class="field-label" for="title">Title / Name of Document *</label>
-          <input class="input" id="title" name="title" type="text" required placeholder="e.g. Bachelor of Technology in Computer Science" value="{{ form.get('title', '') }}">
+          <input class="input" id="title" name="title" type="text" required placeholder="e.g. Bachelor of Technology in Computer Science & Engineering" value="{{ form.get('title', '') }}">
           {% if errors.get('title') %}
             <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['title'] }}</div>
           {% endif %}
@@ -83,33 +123,15 @@
 
         <div>
           <label class="field-label" for="validity_days">Validity in Days (Optional)</label>
-          <input class="input" id="validity_days" name="validity_days" type="number" placeholder="Leave blank if it never expires" value="{{ form.get('validity_days', '') }}">
+          <input class="input" id="validity_days" name="validity_days" type="number" placeholder="Leave blank for permanent lifetime validity (never expires)" value="{{ form.get('validity_days', '') }}">
+          <span class="tiny faint" style="display:block; margin-top:0.25rem">Academic degrees, board marksheets, and transcripts are permanent by default.</span>
           {% if errors.get('validity_days') %}
             <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['validity_days'] }}</div>
           {% endif %}
         </div>
       </div>
 
-      <hr class="divider">
-
-      <!-- File Upload -->
-      <div class="stack stack-3">
-        <h3>Source Document <span style="color:var(--red,#e53935);font-size:.85em">(Required)</span></h3>
-        <p class="small muted" style="margin:0">
-          A document file is required to issue a credential.
-          It will be securely hashed, anchored to the blockchain, and stored.
-          Accepted formats: PDF, PNG, JPG, JPEG, WEBP. Max 16 MB.
-        </p>
-
-        <div>
-          <input type="file" id="document" name="document" class="input" required accept=".png,.jpg,.jpeg,.pdf,.webp">
-          {% if errors.get('document') %}
-            <div class="alert alert-danger" style="margin-top:0.5rem; padding:0.5rem">{{ errors['document'] }}</div>
-          {% endif %}
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1rem">
+      <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1rem; width:100%; padding:0.85rem">
         <span aria-hidden="true">🔒</span> Issue and Anchor to Blockchain
       </button>
 
@@ -120,74 +142,137 @@
 
 {% block scripts %}
 <script>
-// DOC_TYPE mapping for auto-select after AI extraction
 const DOC_TYPE_KEYS = {{ doc_types.keys()|list|tojson }};
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('document');
+const fileInfo = document.getElementById('file-info');
+const fileName = document.getElementById('file-name');
+const fileSize = document.getElementById('file-size');
+const aiStatus = document.getElementById('ai-status');
+const aiStatusText = document.getElementById('ai-status-text');
 
-async function runAIExtract() {
-  const fileInput = document.getElementById('document');
-  const btn = document.getElementById('ai-extract-btn');
-  const status = document.getElementById('ai-status');
+function triggerFileSelect(e) {
+  if (e) e.stopPropagation();
+  fileInput.click();
+}
 
-  if (!fileInput.files.length) {
-    status.style.display = 'block';
-    status.textContent = '⚠️ Please select a document file first, then click Extract.';
-    return;
+dropZone.addEventListener('click', function(e) {
+  if (e.target.tagName !== 'BUTTON') {
+    fileInput.click();
   }
+});
 
-  btn.disabled = true;
-  btn.textContent = '⏳ Extracting…';
-  status.style.display = 'block';
-  status.textContent = 'Sending to Gemini AI…';
+dropZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  dropZone.style.borderColor = 'var(--green-lit, #34d399)';
+  dropZone.style.background = 'rgba(16, 185, 129, 0.1)';
+});
+
+dropZone.addEventListener('dragleave', function() {
+  dropZone.style.borderColor = 'rgba(56, 189, 248, 0.45)';
+  dropZone.style.background = 'rgba(15, 23, 42, 0.65)';
+});
+
+dropZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  dropZone.style.borderColor = 'rgba(56, 189, 248, 0.45)';
+  dropZone.style.background = 'rgba(15, 23, 42, 0.65)';
+  if (e.dataTransfer.files && e.dataTransfer.files.length) {
+    fileInput.files = e.dataTransfer.files;
+    handleFileSelected(fileInput.files[0]);
+  }
+});
+
+fileInput.addEventListener('change', function() {
+  if (fileInput.files && fileInput.files.length) {
+    handleFileSelected(fileInput.files[0]);
+  }
+});
+
+function handleFileSelected(file) {
+  if (!file) return;
+
+  // Show file info pill
+  fileName.textContent = file.name;
+  fileSize.textContent = '(' + (file.size / (1024 * 1024)).toFixed(2) + ' MB)';
+  fileInfo.style.display = 'flex';
+
+  // Automatically trigger Gemini OCR extraction immediately!
+  autoExtractWithGemini(file);
+}
+
+async function autoExtractWithGemini(file) {
+  aiStatus.style.display = 'block';
+  aiStatus.style.borderColor = 'rgba(56, 189, 248, 0.5)';
+  aiStatusText.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">⏳</span> <strong>Gemini 2.0 Flash is analyzing document…</strong> Extracting student identity, board, and marksheet fields automatically.';
 
   const formData = new FormData();
-  formData.append('document', fileInput.files[0]);
+  formData.append('document', file);
+
+  const controller = new AbortController();
+  const timeoutTimer = setTimeout(() => controller.abort(), 25000);
 
   try {
     const resp = await fetch('{{ url_for("issuer.extract_fields") }}', {
       method: 'POST',
       body: formData,
+      signal: controller.signal
     });
+    clearTimeout(timeoutTimer);
     const data = await resp.json();
 
     if (data.error) {
-      status.textContent = '⚠️ ' + data.error;
+      aiStatus.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      aiStatusText.innerHTML = '⚠️ ' + data.error + ' (Please review and complete fields manually)';
       return;
     }
 
-    // Pre-fill form fields
     let filled = [];
-    if (data.roll_number) {
-      document.getElementById('roll_number').value = data.roll_number;
-      filled.push('roll number');
+    function setField(id, val, name) {
+      if (!val) return;
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = val;
+        el.style.borderColor = 'var(--green-lit, #34d399)';
+        el.style.boxShadow = '0 0 10px rgba(52, 211, 153, 0.35)';
+        filled.push(name);
+      }
     }
-    if (data.student_name) {
-      document.getElementById('student_name').value = data.student_name;
-      filled.push('student name');
-    }
-    if (data.student_email) {
-      document.getElementById('student_email').value = data.student_email;
-      filled.push('student email');
-    }
-    if (data.title) {
-      document.getElementById('title').value = data.title;
-      filled.push('title');
-    }
+
+    setField('roll_number', data.roll_number, 'Roll Number');
+    setField('student_name', data.student_name, 'Student Name');
+    setField('student_email', data.student_email, 'Student Email');
+    setField('dob', data.dob, 'Date of Birth');
+    setField('title', data.title, 'Document Title');
+
     if (data.doc_type && DOC_TYPE_KEYS.includes(data.doc_type)) {
-      document.getElementById('doc_type').value = data.doc_type;
-      filled.push('document type');
+      const dtEl = document.getElementById('doc_type');
+      if (dtEl) {
+        dtEl.value = data.doc_type;
+        dtEl.style.borderColor = 'var(--green-lit, #34d399)';
+        dtEl.style.boxShadow = '0 0 10px rgba(52, 211, 153, 0.35)';
+        filled.push('Document Type (' + data.doc_type + ')');
+      }
     }
 
     if (filled.length) {
-      status.textContent = '✅ Filled: ' + filled.join(', ') + '. Please review and submit.';
+      aiStatus.style.borderColor = 'rgba(52, 211, 153, 0.6)';
+      aiStatusText.innerHTML = '✅ <strong style="color:var(--green-lit, #34d399)">Auto-filled from document:</strong> ' + filled.join(', ') + '. Please review details below and click Issue.';
     } else {
-      status.textContent = '⚠️ Gemini could not extract fields from this document. Fill manually.';
+      aiStatusText.innerHTML = 'ℹ️ Document attached. Please review and fill the fields below to anchor to the blockchain.';
     }
   } catch (err) {
-    status.textContent = '❌ Extraction failed: ' + err.message;
+    if (err.name === 'AbortError') {
+      aiStatusText.innerHTML = '⚠️ AI extraction timed out. File is attached; please verify fields manually.';
+    } else {
+      aiStatusText.innerHTML = '⚠️ Note: ' + err.message + '. File attached; please complete fields manually.';
+    }
   } finally {
-    btn.disabled = false;
-    btn.textContent = '✨ Extract Fields';
+    clearTimeout(timeoutTimer);
   }
 }
 </script>
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
 {% endblock %}

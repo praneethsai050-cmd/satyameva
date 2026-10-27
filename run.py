@@ -20,8 +20,8 @@ if __name__ == '__main__':
     google_ok = bool(app.config.get('GOOGLE_CLIENT_ID') and app.config.get('GOOGLE_CLIENT_SECRET'))
     mail_ok = bool(app.config.get('MAIL_USERNAME') and app.config.get('MAIL_PASSWORD'))
 
-    admin_user = os.environ.get('ADMIN_USERNAME', 'admin')
-    admin_email = os.environ.get('ADMIN_EMAIL', 'hackathonsage@gmail.com')
+    admin_user = os.environ.get('ADMIN_USERNAME', 'superadmin')
+    admin_email = os.environ.get('ADMIN_EMAIL', 'superadmin@satyameva.in')
 
     print()
     print('  +--------------------------------------------------+')

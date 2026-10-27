@@ -5,7 +5,9 @@ Tests Student, Issuer, and Verifier portals, blockchain persistence, and verific
 import io
 import json
 import os
+import shutil
 import sys
+import tempfile
 
 from app import create_app
 from blockchain import Blockchain, blockchain_instance, validate_chain
@@ -14,17 +16,33 @@ from models import Doc, Document, FraudReport, Notification, Student, User, Veri
 
 
 def run_tests():
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['WTF_CSRF_ENABLED'] = False
+    temp_dir = tempfile.mkdtemp(prefix='satyameva_e2e_')
+    temp_db_path = os.path.join(temp_dir, 'e2e.db')
+    temp_chain_path = os.path.join(temp_dir, 'blockchain.json')
+
+    orig_storage = blockchain_instance.storage_file
+    orig_diff = blockchain_instance.difficulty
+    blockchain_instance.storage_file = temp_chain_path
+    blockchain_instance.difficulty = 1
+
+    app = create_app(test_config={
+        'TESTING': True,
+        'WTF_CSRF_ENABLED': False,
+        'MAIL_SUPPRESS_SEND': True,
+        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{temp_db_path}',
+        'POW_DIFFICULTY': 1,
+    })
 
     client = app.test_client()
 
-    with app.app_context():
+    ctx = app.app_context()
+    ctx.push()
+
+    try:
         print("=== Test 1: Blockchain Persistence & Genesis Block ===")
         ok, msg = validate_chain()
         assert ok, f"Blockchain validation failed: {msg}"
-        assert os.path.exists("instance/blockchain.json"), "instance/blockchain.json not found"
+        assert os.path.exists(blockchain_instance.storage_file), f"{blockchain_instance.storage_file} not found"
         print(" -> Blockchain is valid and synced to JSON file.")
 
         print("\n=== Test 2: User Registration (Unified Form for 3 Roles) ===")
@@ -256,6 +274,16 @@ def run_tests():
         print("\n=======================================================")
         print(">>> ALL 11 BOOST END-TO-END SUITES PASSED WITH 100%! <<<")
         print("=======================================================")
+    finally:
+        blockchain_instance.storage_file = orig_storage
+        blockchain_instance.difficulty = orig_diff
+        try:
+            db.session.remove()
+            db.engine.dispose()
+        except Exception:
+            pass
+        ctx.pop()
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 if __name__ == '__main__':

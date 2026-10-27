@@ -68,8 +68,7 @@ class BaseBulkIssueTestCase(unittest.TestCase):
         blockchain_instance.difficulty = 1
 
         # Configure isolated environment
-        self.app = create_app()
-        self.app.config.update({
+        self.app = create_app(test_config={
             'TESTING': True,
             'WTF_CSRF_ENABLED': False,
             'MAIL_SUPPRESS_SEND': True,

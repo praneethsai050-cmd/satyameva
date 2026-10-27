@@ -236,41 +236,67 @@
     <!-- ── Right column: credential facts + QR sharing ────────────────── -->
     <aside class="stack stack-4 scene">
 
-      <!-- Validity ring -->
+      <!-- Credential Validity Status -->
       <section class="panel">
-        <div class="panel-title">📅 Validity</div>
-        <div class="row" style="gap:1.25rem">
-          <div class="ring" style="--pct:{{ doc.lifetime_percent }};
-                    --ring-color: var(--{{ 'green-lit' if doc.status == 'VALID'
-                                          else ('orange-lit' if doc.status == 'EXPIRING'
-                                          else ('slate-lit' if doc.revoked else 'red-lit')) }});"
-               role="img" aria-label="{{ doc.lifetime_percent }} percent of validity remaining">
-            <span>
-              <span class="ring-num">{{ doc.lifetime_percent }}%</span>
-              <span class="ring-cap">left</span>
-            </span>
-          </div>
+        <div class="panel-title">🛡️ Credential Status</div>
+        {% if doc.valid_until %}
+          <!-- Expiring credential with active window -->
+          <div class="row" style="gap:1.25rem">
+            <div class="ring" style="--pct:{{ doc.lifetime_percent }};
+                      --ring-color: var(--{{ 'green-lit' if doc.status == 'VALID'
+                                            else ('orange-lit' if doc.status == 'EXPIRING'
+                                            else ('slate-lit' if doc.revoked else 'red-lit')) }});"
+                 role="img" aria-label="{{ doc.lifetime_percent }} percent of validity remaining">
+              <span>
+                <span class="ring-num">{{ doc.lifetime_percent }}%</span>
+                <span class="ring-cap">left</span>
+              </span>
+            </div>
 
-          <div class="stack stack-2" style="flex:1; min-width:0">
-            <div>
-              <div class="tiny upper faint">Issued</div>
-              <b>{{ doc.issued_on|date }}</b>
-            </div>
-            <div>
-              <div class="tiny upper faint">Valid until</div>
-              <b>{{ doc.valid_until|date if doc.valid_until else 'No expiry' }}</b>
-            </div>
-            {% set left = doc.days_left %}
-            {% if left is not none %}
-              <div class="tiny {{ 'faint' if left > 30 else '' }}"
-                   style="{{ 'color:var(--orange-lit)' if 0 <= left <= 30
-                             else ('color:var(--red-lit)' if left < 0 else '') }}">
-                {% if left < 0 %}Expired {{ -left }} days ago
-                {% else %}{{ left }} days remaining{% endif %}
+            <div class="stack stack-2" style="flex:1; min-width:0">
+              <div>
+                <div class="tiny upper faint">Issued</div>
+                <b>{{ doc.issued_on|date }}</b>
               </div>
-            {% endif %}
+              <div>
+                <div class="tiny upper faint">Valid until</div>
+                <b>{{ doc.valid_until|date }}</b>
+              </div>
+              {% set left = doc.days_left %}
+              {% if left is not none %}
+                <div class="tiny {{ 'faint' if left > 30 else '' }}"
+                     style="{{ 'color:var(--orange-lit)' if 0 <= left <= 30
+                               else ('color:var(--red-lit)' if left < 0 else '') }}">
+                  {% if left < 0 %}Expired {{ -left }} days ago
+                  {% else %}{{ left }} days remaining{% endif %}
+                </div>
+              {% endif %}
+            </div>
           </div>
-        </div>
+        {% else %}
+          <!-- Permanent Academic Credential (Lifetime Validity / Never Expires) -->
+          <div class="stack stack-3">
+            <div class="row" style="gap:1rem; align-items:center">
+              <div style="width:48px; height:48px; border-radius:50%; background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:var(--green-lit)">
+                ✓
+              </div>
+              <div>
+                <div style="font-weight:700; color:var(--green-lit); font-size:1.05rem">LIFETIME VALIDITY</div>
+                <div class="tiny faint" style="font-family:var(--mono)">PERMANENT ON-CHAIN RECORD · NEVER EXPIRES</div>
+              </div>
+            </div>
+            <div class="row row-between" style="border-top:1px solid var(--border); padding-top:0.75rem; margin-top:0.25rem">
+              <div>
+                <div class="tiny upper faint">Issued On</div>
+                <b>{{ doc.issued_on|date }}</b>
+              </div>
+              <div style="text-align:right">
+                <div class="tiny upper faint">Validity Window</div>
+                <span class="badge badge-valid" style="font-size:0.75rem">PERMANENT / LIFETIME</span>
+              </div>
+            </div>
+          </div>
+        {% endif %}
       </section>
 
       <!-- ══ Share (QR) ══════════════════════════════════════════════════ -->

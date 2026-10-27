@@ -45,8 +45,10 @@
   {% block chrome %}
   <header class="nav">
     <div class="nav-inner">
-      <a class="brand" href="{{ url_for('index') }}">
-        <span class="brand-cube" aria-hidden="true"><i></i></span>
+      <a class="brand" href="{{ url_for('index') }}" title="{{ campus_name }}">
+        <span class="brand-logo-frame">
+          <img src="{{ url_for('static', filename='img/campuses/' + (current_campus or 'juit') + '.png') }}" alt="{{ campus_code }} Logo" class="brand-logo-img">
+        </span>
         <span>
           <span class="brand-name">{{ brand }} <span class="badge" style="font-size:.65rem;vertical-align:middle;padding:.15rem .45rem;border-radius:99px;border:1px solid var(--border)">{{ campus_code }}</span></span>
           <span class="brand-sub">{{ campus_name }} · {{ tagline }}</span>
@@ -108,7 +110,9 @@
 
           <div class="badge-3d-profile" title="Verified {{ current_user.role|capitalize }} · {{ campus_name }}">
             <span class="profile-dot" aria-hidden="true"></span>
-            <span class="avatar" style="width:24px;height:24px;font-size:.7rem;line-height:24px" aria-hidden="true">{{ current_user.initials }}</span>
+            <span class="avatar" style="width:24px;height:24px;padding:1px;background:#fff;border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center" aria-hidden="true">
+              <img src="{{ url_for('static', filename='img/campuses/' + (current_campus or 'juit') + '.png') }}" alt="{{ campus_code }}" style="width:100%;height:100%;object-fit:contain">
+            </span>
             <span class="stack" style="line-height:1.15">
               <b class="tiny nowrap">{{ current_user.display_name }}</b>
               <span class="tiny faint" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.05em">{{ current_user.role }} · {{ campus_code }}</span>

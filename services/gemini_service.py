@@ -15,7 +15,11 @@ log = logging.getLogger(__name__)
 # Accepted document types that Satyameva recognizes
 _KNOWN_TYPES = {
     'DEGREE': ('DEGREE', 'DEGREE CERTIFICATE', 'BACHELOR', 'MASTER', 'DOCTOR', 'B.TECH', 'M.TECH'),
-    'MARKSHEET': ('MARKSHEET', 'TRANSCRIPT', 'GRADE CARD', 'MARK SHEET'),
+    'CBSE_MARKSHEET': ('CBSE', 'CENTRAL BOARD OF SECONDARY EDUCATION', 'AISSCE', 'AISSE', 'CLASS X', 'CLASS XII', 'CLASS 10', 'CLASS 12'),
+    'ICSE_MARKSHEET': ('ICSE', 'ISC', 'COUNCIL FOR THE INDIAN SCHOOL CERTIFICATE', 'INDIAN CERTIFICATE OF SECONDARY EDUCATION'),
+    'STATE_BOARD_MARKSHEET': ('STATE BOARD', 'HSC', 'SSC', 'BIE', 'INTERMEDIATE', 'SECONDARY SCHOOL CERTIFICATE'),
+    'MARKSHEET': ('MARKSHEET', 'TRANSCRIPT', 'GRADE CARD', 'MARK SHEET', 'CONSOLIDATED GRADE'),
+    'DIPLOMA': ('DIPLOMA', 'POLYTECHNIC'),
     'TC': ('TC', 'TRANSFER CERTIFICATE', 'TRANSFER'),
     'MIGRATION': ('MIGRATION', 'MIGRATION CERTIFICATE'),
     'BONAFIDE': ('BONAFIDE', 'BONAFIDE CERTIFICATE', 'BONA FIDE'),
@@ -27,9 +31,9 @@ Extract the following fields from the provided document image or PDF:
 - student_name: full legal name of the student
 - roll_number: student roll / enrollment / registration number
 - student_email: email address of the student if found on the document
-- doc_type: one of DEGREE, MARKSHEET, TC, MIGRATION, BONAFIDE, or INTERNSHIP
-- title: exact credential title (e.g. "Bachelor of Technology in Computer Science")
-- institution: name of the issuing university or institute
+- doc_type: one of DEGREE, MARKSHEET, CBSE_MARKSHEET, ICSE_MARKSHEET, STATE_BOARD_MARKSHEET, DIPLOMA, TC, MIGRATION, BONAFIDE, or INTERNSHIP
+- title: exact credential title (e.g. "Bachelor of Technology in Computer Science", "CBSE Class XII Marksheet")
+- institution: name of the issuing university, board, or institute (e.g. "Jaypee University of Information Technology", "CBSE")
 - dob: date of birth of the student in DDMMYYYY format (e.g. 01011999). If not explicitly found, use empty string ""
 
 Respond ONLY with a valid JSON object in this exact format:
@@ -48,6 +52,19 @@ def _match_doc_type(raw_type: str) -> str:
     return ''
 
 
+def _normalize_mime_type(file_bytes: bytes, mime_type: str | None = None) -> str:
+    """Infer accurate MIME type from magic bytes if generic or missing."""
+    if file_bytes.startswith(b'%PDF'):
+        return 'application/pdf'
+    if file_bytes.startswith(b'\x89PNG\r\n\x1a\n'):
+        return 'image/png'
+    if file_bytes.startswith(b'\xff\xd8\xff'):
+        return 'image/jpeg'
+    if file_bytes.startswith(b'RIFF') and b'WEBP' in file_bytes[:16]:
+        return 'image/webp'
+    return mime_type or 'application/pdf'
+
+
 def extract_document_fields(
     file_bytes: bytes,
     mime_type: str,
@@ -62,20 +79,30 @@ def extract_document_fields(
     """
     if not api_key:
         log.warning('GEMINI_API_KEY not configured — skipping AI extraction')
-        return {}
+        return {'error': 'Gemini API key not configured on this server.'}
 
     try:
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=api_key)
+        resolved_mime = _normalize_mime_type(file_bytes, mime_type)
+        client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=15000)  # 15s timeout per request
+        )
 
-        part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
+        part = types.Part.from_bytes(data=file_bytes, mime_type=resolved_mime)
         prompt = "Extract student_name, roll_number, doc_type, title, institution, and dob (as DDMMYYYY) from this document."
 
-        # Model cascade: try fast & responsive models in order
-        candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-latest']
+        # Active high-throughput Gemini models in order of speed & availability
+        candidate_models = [
+            'gemini-3.6-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.5-flash',
+            'gemini-3.8-flash',
+        ]
         response_text = None
+        last_error = None
 
         for model_name in candidate_models:
             try:
@@ -90,12 +117,15 @@ def extract_document_fields(
                 )
                 if resp and resp.text:
                     response_text = resp.text.strip()
+                    log.info('Gemini extraction succeeded with %s', model_name)
                     break
             except Exception as model_err:
+                last_error = str(model_err)
                 log.info('Model %s returned: %s, trying next candidate...', model_name, model_err)
 
         if not response_text:
-            return {}
+            log.warning('All Gemini candidate models failed: %s', last_error)
+            return {'error': f'AI service temporarily unavailable. Please enter details manually.'}
 
         # Strip markdown fences if present
         raw = response_text
@@ -120,4 +150,4 @@ def extract_document_fields(
 
     except Exception as exc:
         log.warning('Gemini extraction failed: %s', exc)
-        return {}
+        return {'error': f'Document parsing failed: {exc}'}

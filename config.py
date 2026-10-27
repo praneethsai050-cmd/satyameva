@@ -84,8 +84,17 @@ class ProductionConfig(BaseConfig):
     SESSION_COOKIE_SECURE = True
 
 
+class TestingConfig(BaseConfig):
+    TESTING = True
+    DEBUG = False
+    WTF_CSRF_ENABLED = False
+    MAIL_SUPPRESS_SEND = True
+    POW_DIFFICULTY = 1
+
+
 config_by_name = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'testing': TestingConfig,
     'default': DevelopmentConfig,
 }

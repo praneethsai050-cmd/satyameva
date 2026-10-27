@@ -53,7 +53,7 @@ check('GET  /nope (404 page)', c.get('/nope'), 404)
 
 # ── log in ────────────────────────────────────────────────────────────────
 admin_pass = os.environ.get('ADMIN_PASSWORD', 'Satyameva@2026')
-admin_user = os.environ.get('ADMIN_USERNAME', 'admin')
+admin_user = os.environ.get('ADMIN_USERNAME', 'superadmin')
 
 # Test admin login
 r = c.post('/login', data={'identifier': admin_user, 'password': admin_pass})
@@ -66,6 +66,22 @@ check('GET  /admin/institutions', c.get('/admin/institutions'))
 check('GET  /admin/documents', c.get('/admin/documents'))
 check('GET  /admin/stats.json', c.get('/admin/stats.json'))
 check('GET  /logout', c.get('/logout'), 302)
+
+# Test issuer login
+r_issuer = c.post('/login', data={'identifier': 'juit.registrar', 'password': 'Juit@2026'})
+check('POST /login (issuer)', r_issuer, 302)
+check('GET  /issuer/ (dashboard)', c.get('/issuer/'))
+check('GET  /issuer/issue', c.get('/issuer/issue'))
+check('GET  /issuer/bulk-issue', c.get('/issuer/bulk-issue'))
+check('GET  /issuer/sample-csv', c.get('/issuer/sample-csv'))
+check('GET  /logout (issuer)', c.get('/logout'), 302)
+
+# Test verifier login
+r_verifier = c.post('/login', data={'identifier': 'verifier', 'password': 'Verifier@2026'})
+check('POST /login (verifier)', r_verifier, 302)
+check('GET  /verifier/dashboard', c.get('/verifier/dashboard'))
+check('GET  /verifier/history', c.get('/verifier/history'))
+check('GET  /logout (verifier)', c.get('/logout'), 302)
 
 with app.app_context():
     student_user = User.query.filter_by(role='student').first()

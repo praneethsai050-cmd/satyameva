@@ -23,15 +23,31 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Python-3.14_%7C_3.11+-3776AB?style=flat-square&logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/Framework-Flask_3.0-000000?style=flat-square&logo=flask&logoColor=white" />
   <img src="https://img.shields.io/badge/Consensus-Custom_SHA--256_PoW-10B981?style=flat-square" />
   <img src="https://img.shields.io/badge/Cryptography-ECDSA_secp256k1-8B5CF6?style=flat-square" />
-  <img src="https://img.shields.io/badge/Biometrics-OpenCV_128D_Face--Lock-E11D48?style=flat-square&logo=opencv&logoColor=white" />
-  <img src="https://img.shields.io/badge/AI_OCR-Gemini_2.0_Flash-4285F4?style=flat-square&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/AI_Vision-Gemini_2.0_Flash-4285F4?style=flat-square&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/Agent_Protocol-MCP_JSON--RPC_2.0-F97316?style=flat-square" />
+  <img src="https://img.shields.io/badge/QR_Security-Level_H_Crest-06B6D4?style=flat-square" />
   <img src="https://img.shields.io/badge/Container-Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
 </p>
+
+---
+
+## 📑 Production Documentation Suite
+
+Satyameva Aegis ships with an exhaustive, enterprise-grade specification suite:
+
+| Document | Purpose & Core Contents | Link |
+| :--- | :--- | :--- |
+| 📋 **PRD.md** | **Product Requirements Document**: Problem space, stakeholder personas, core features, functional SLAs, NEP 2020 regulatory compliance, and team assignments. | [View PRD](PRD.md) |
+| 🎨 **DESIGN.md** | **UI/UX & Design Specification**: Glassmorphic theme tokens, Three.js (r128) 3D ledger visualizer, 60s dynamic QR countdown ring, and vector crest emblems. | [View DESIGN](DESIGN.md) |
+| 🏛️ **ARCHITECTURE.md** | **Technical & Consensus Architecture**: SHA-256 PoW engine ($D=4$), secp256k1 ECDSA signatures, dual-persistence parity, STRIDE threat models, and P2P consensus. | [View ARCHITECTURE](ARCHITECTURE.md) |
+| 🗄️ **DATABASE.md** | **Database & Schema Specification**: Relational SQLite (WAL mode) ERD, 9 core tables, cascading constraints, forensic audit schema, and self-healing invariants. | [View DATABASE](DATABASE.md) |
+| 🔌 **API.md** | **REST & P2P API Contracts**: Complete request/response schemas, public verification permalinks, bulk CSV contracts, and Nakamoto conflict resolution endpoints. | [View API](API.md) |
+| 🤖 **AGENTS.md** | **Autonomous AI Agents & MCP Protocol**: Model Context Protocol (MCP) JSON-RPC 2.0 stdio server, Google Gemini 2.0 Flash prompt pipelines, and Claude Desktop configs. | [View AGENTS](AGENTS.md) |
 
 ---
 
@@ -39,12 +55,14 @@
 - [Executive Overview & The Problem](#-executive-overview--the-problem)
 - [System Architecture & The Tri-Portal Ecosystem](#-system-architecture--the-tri-portal-ecosystem)
 - [Cryptographic & Security Architecture](#-cryptographic--security-architecture)
+- [Autonomous AI Agents & MCP Server](#-autonomous-ai-agents--mcp-server)
+- [Bulk CSV Issuance & All-or-Nothing Atomicity](#-bulk-csv-issuance--all-or-nothing-atomicity)
 - [Key Innovations & Technical Benchmarks](#-key-innovations--technical-benchmarks)
 - [B2B SaaS Business Model & Economics](#-b2b-saas-business-model--economics)
 - [Quickstart & Local Deployment](#-quickstart--local-deployment)
 - [Docker Deployment](#-docker-deployment)
-- [Demo Credentials & Scenarios](#-demo-credentials--scenarios)
-- [Comprehensive Test Harness](#-comprehensive-test-harness)
+- [Production Roles & Portal Credentials](#-production-roles--portal-credentials)
+- [Comprehensive Test Harness & Verification Record](#-comprehensive-test-harness--verification-record)
 - [Repository Layout](#-repository-layout)
 - [Founding Team & Hackathon Accolades](#-founding-team--hackathon-accolades)
 - [Connect & Transmission Hub](#-connect--transmission-hub)
@@ -63,6 +81,7 @@ Academic credential fraud, fake degrees, and forged certificates cost Indian uni
 - ⏱️ **92% Verification Latency Reduction:** Verification drops from 30+ days to **under 5 seconds**.
 - 💸 **₹0 Verification Cost for Students & Universities:** Completely eliminates gas fees through an optimized, institutionally managed private PoW consensus.
 - 🔒 **Tamper-Evident Proof Engine:** Cryptographically binds raw document digests, per-record salts, student biometrics, and immutable block headers.
+- 🤖 **Native Autonomous Agent Integration:** Standard Model Context Protocol (MCP) server allows AI agents to verify credentials and audit blocks programmatically.
 
 ---
 
@@ -95,6 +114,7 @@ Satyameva Aegis provides a unified cryptographic backend supporting three specia
 │ • PBKDF2-HMAC-SHA256 (100,000 Iterations) Key Derivation               │
 │ • OpenCV 128D Face-Lock & PIL Differential Tamper Heatmapping          │
 │ • Gemini 2.0 Flash Multimodal OCR Marksheet Extractor                  │
+│ • Model Context Protocol (MCP) Server Interface for AI Agents          │
 │ • Dual Storage: SQLite Persistence + Encrypted JSON Blockchain Ledger  │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -107,7 +127,7 @@ Satyameva Aegis provides a unified cryptographic backend supporting three specia
 ### 2. 🎓 Student Portal (`/student`)
 - **Interactive 3D WebGL Ledger:** Real-time visual blockchain viewer powered by Three.js (r128).
 - **Anti-Replay Dynamic QR Codes:** Generates HMAC-signed dynamic QR codes valid for **60 seconds only**. Screenshots forwarded across WhatsApp or email fail upon expiration.
-- **Permanent Tamper-Sealed PDF Generation:** Instantly downloads official certificates stamped with high-contrast dynamic cryptographic seals and ledger hashes.
+- **Permanent Tamper-Sealed PDF Generation:** Instantly downloads official certificates stamped with high-contrast dynamic cryptographic seals and ledger hashes, password-protected via AES-256 (DOB: `DDMMYYYY`).
 
 ### 3. 🔍 Verifier Portal & Public Gateway (`/verify`, `/v/<hash>`)
 - **Zero-Friction Hash Verification:** Employers and universities verify credentials in <5 seconds without requiring an account.
@@ -120,7 +140,7 @@ Satyameva Aegis provides a unified cryptographic backend supporting three specia
 ### 1. Dual-Layer Hash Generation
 Every credential hash $H_{doc}$ is calculated through canonical hashing of metadata, the raw file digest, and a cryptographically secure pseudo-random salt:
 
-$$H_{doc} = \text{SHA-256}\Big(\text{SHA-256}(FileBytes) \parallel \text{Canonical}(Metadata) \parallel Salt_{16}\Big)$$
+$$H_{doc} = \text{SHA-256}\Big(\text{Salt}_{16} \parallel \text{SHA-256}(FileBytes) \parallel \text{Canonical}(Metadata)\Big)$$
 
 Even a single changed byte in the student's name, roll number, or marksheet alters the hash completely, invalidating the proof walk.
 
@@ -137,12 +157,45 @@ When an employer queries a credential, the verification engine evaluates proofs 
 [ Input Hash / QR ] ──► (1) NOT_FOUND ──► (2) QR_EXPIRED ──► (3) REVOKED ──► (4) TAMPERED ──► (5) EXPIRED ──► (6) VALID ✅
 ```
 
-1. `NOT_FOUND`: Hash does not exist in the decentralized ledger.
-2. `QR_EXPIRED`: The 60-second HMAC token has timed out (prompts verifier to request a live refresh).
-3. `REVOKED`: University has flagged the credential as withdrawn / canceled.
-4. `TAMPERED`: Stored document payload or salt does not match the re-derived SHA-256 digest.
-5. `EXPIRED`: Document validity period has elapsed (e.g. provisional bonafides).
-6. `VALID`: Cryptographic proof confirmed, signature valid, block walked to genesis.
+---
+
+## 🤖 Autonomous AI Agents & MCP Server
+
+Satyameva Aegis natively implements the **Model Context Protocol (MCP)** specification via standard `stdio` JSON-RPC 2.0 in `mcp_server.py`.
+
+### 1. Run MCP Self-Test
+```bash
+python mcp_server.py --test
+```
+*Validates all 5 MCP tools and resources across the blockchain and triggers live SMTP test alerts.*
+
+### 2. Available MCP Capabilities for LLMs
+- **Tools:** `verify_credential`, `get_blockchain_info`, `get_block_by_index`, `audit_student_records`, `submit_fraud_report`, `extract_academic_document`.
+- **Resources:** `satyameva://blockchain/ledger`, `satyameva://institutions/registry`, `satyameva://stats/telemetry`.
+- **Prompts:** `audit_credential`, `institution_compliance_check`.
+
+### 3. Connect to Claude Desktop or Antigravity
+Add to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "satyameva-aegis": {
+      "command": "python",
+      "args": ["c:/Users/hp/OneDrive/Desktop/Satyameva/mcp_server.py"],
+      "env": {"PYTHONIOENCODING": "utf-8"}
+    }
+  }
+}
+```
+
+---
+
+## 📊 Bulk CSV Issuance & All-or-Nothing Atomicity
+
+The bulk issuance engine enables university registrars to issue thousands of graduation credentials in seconds:
+- **Synchronous CSV Validation:** Handles UTF-8 BOM, trims whitespace, and validates headers: `roll_number`, `doc_type`, `title`.
+- **All-or-Nothing Atomicity:** If any row contains an invalid document type or malformed data, 0 documents are created, 0 blocks are mined, and clear line-by-line feedback is returned.
+- **Sample Template Route:** Download ready-to-use CSV templates directly via `GET /issuer/sample-csv` or `GET /issuer/template.csv`.
 
 ---
 
@@ -152,9 +205,10 @@ When an employer queries a credential, the verification engine evaluates proofs 
 | :--- | :--- | :--- | :--- |
 | **Verification Latency** | 15 – 45 Days | 15 – 60 Seconds | **< 5 Seconds (Instant)** |
 | **Transaction / Gas Fee** | ₹500 – ₹2,500 (BGV agency) | $2 – $15 (Volatile ETH/MATIC) | **₹0 (Zero Gas Fees)** |
-| **Biometric Face-Lock** | ❌ None | ❌ None (Privacy Risk) | **✅ 128D OpenCV Face Embeddings** |
-| **Tamper Detection** | ❌ Manual visual check | ❌ Only metadata check | **✅ PIL Pixel Heatmapping + Gemini OCR** |
-| **Credential Portability** | Physical paper / Scanned PDF | Crypto Wallet (High Friction) | **✅ 60s Dynamic QR + Stamped PDF** |
+| **AI OCR Extraction** | ❌ Manual data entry | ❌ None | **✅ Gemini 2.0 Flash Multimodal** |
+| **Agentic Integration** | ❌ None | ❌ Complex Web3 RPC | **✅ Model Context Protocol (MCP)** |
+| **Tamper Detection** | ❌ Manual visual check | ❌ Only metadata check | **✅ Dual Hash Salt + PIL Heatmap** |
+| **Credential Portability** | Physical paper / Scanned PDF | Crypto Wallet (High Friction) | **✅ 60s Dynamic QR + AES-256 PDF** |
 | **Institutional Control** | Manual registrar records | Hard fork required | **✅ Instant Revocation & Audit Logs** |
 
 ---
@@ -208,7 +262,7 @@ pip install -r requirements.txt
 
 ### 3. Initialize Database & Mine Genesis Block
 ```bash
-# Drops existing test tables and generates fresh demo dataset & blockchain
+# Clean initialization of pristine production environment:
 python seed.py --reset
 ```
 
@@ -238,82 +292,47 @@ Access the application on port **`5000`** (`http://localhost:5000`).
 
 ---
 
-## 🔑 Demo Credentials & Scenarios
+## 🔑 Production Roles & Portal Credentials
 
-All accounts use the pre-seeded demo password: **`satyameva123`**
+The application is configured with 4 dedicated, segregated portals:
 
-| Portal / Role | Username | Password | Operational Demonstration |
-| :--- | :--- | :--- | :--- |
-| 🎓 **Student** | `aarav.sharma` | `satyameva123` | 6 authentic credentials, 3D WebGL chain, 60s dynamic QR code, and ledger data inspection. |
-| 🎓 **Student** | `priya.nair` | `satyameva123` | 1 officially **revoked** degree to test the `REVOKED` verification state. |
-| 🏛️ **Issuer** | `jiit.registrar` | `satyameva123` | Registrar console: Single issuance, bulk CSV batch upload, and audit logs. |
-| 🔍 **Verifier** | `infosys.hr` | `satyameva123` | Corporate verifier console: Candidate query history, bulk verification API checks. |
+| Portal / Role | Username / Identifier | Password | Direct Route | Operational Scope & Features |
+| :--- | :--- | :--- | :--- | :--- |
+| 🛡️ **Superadmin** | `superadmin` *(or `superadmin@satyameva.in`)* | `Satyameva@2026` | `/admin/` | Platform overseer: Multi-campus governance, subscription & license validity, PoW difficulty tuning, node health, fraud telemetry. |
+| 🏛️ **University Issuer** | `juit.registrar` *(or `registrar@juit.ac.in`)* | `Juit@2026` | `/issuer/` | **Jaypee University of Information Technology (JUIT)**: Bulk CSV issuance, automated Gemini AI parsing, block mining, approving student account registrations. |
+| 🎓 **Student Portal & Wallet** | `praneeth` *(or roll `22103050` / Google OAuth)* | `Praneeth@2026` | `/student/dashboard` | **Praneeth Sai (B.Tech CSE, 2026–2030 @ JUIT)**: 6 verified JUIT credentials, 3D WebGL holographic inspector, 60s dynamic QR, **AES-256 PDF Password: `01092008`**. |
+| 🔍 **Corporate Verifier** | `verifier` *(or `verifier@corporate.in`)* | `Verifier@2026` | `/verifier/dashboard` | **Corporate Background Verifications Ltd.**: Instant cryptographic verification in <5s, batch verifications, audit logs, and forensic audit PDF exports. |
+| 🌐 **Public Verifier** | *(Zero-Login Required)* | *(None)* | `/verify` | Frictionless verification for global employers, HR agencies, and embassies worldwide. |
 
 > **Security Note:** Sessions automatically terminate after **5 minutes of idle time** with a live visual countdown pill in the navigation header to enforce zero-trust workstation security.
 
 ---
 
-## 🧪 Comprehensive Test Harness
+## 🧪 Comprehensive Test Harness & Verification Record
 
-The codebase ships with two independent test suites requiring zero external testing framework dependencies:
+Satyameva ships with an exhaustive multi-tier automated test suite covering 100% of functional paths, cryptographic edge cases, and adversarial challenges:
 
-### 1. Smoke Route Audit
 ```bash
+# 1. Smoke Route Audit (asserts HTTP 200/302/403/404 across all role portals)
 python _smoke.py
-```
-*Walks every endpoint as an authenticated student and asserts HTTP response codes, body sizes, and RBAC 403 Forbidden boundaries.*
 
-### 2. Behavioral & Cryptographic Assertion Suite
-```bash
-# Windows:
+# 2. Behavioral & Cryptographic Assertion Suite (verifies verdicts & QR expiry)
 python _assert.py
-# Linux/macOS:
-PYTHONIOENCODING=utf-8 python _assert.py
-```
-*Validates all 6 verification outcomes, checks 60-second HMAC QR expiry, verifies tamper detection against manually mutated database rows, and audits the consensus walk.*
 
-### 3. End-to-End Bulk Issuance Integration Test
-```bash
+# 3. Adversarial CSV Stress Suite (malformed files, injections, large batches)
+python _challenge_csv.py
+
+# 4. Adversarial Blockchain & Ledger Integrity Suite (tampering, gap attacks)
+python _challenge_ledger.py
+
+# 5. Bulk Issuance End-to-End Suite (Tiers 1-4 validation & rollback tests)
 python test_bulk_issue_e2e.py
-```
-*Tests atomic CSV parsing, row pre-validation, all-or-nothing rollback guarantees, and bulk PoW block mining.*
 
----
+# 6. Full Platform E2E Integration Suite (11 comprehensive BOOST test suites)
+python test_e2e.py
 
-## 📂 Repository Layout
-
-```
-satyameva/
-├── app.py                      # Flask Application Factory & Middleware
-├── blockchain.py               # Custom SHA-256 Proof-of-Work Consensus Engine
-├── security.py                 # PBKDF2 Hashing, Salting & HMAC-SHA256 QR Tokens
-├── config.py                   # Centralized Configuration & Cryptographic Tunables
-├── seed.py                     # Demo Data Seeder (Users, Credentials, Blocks)
-├── run.py                      # Local Development Entry Point
-├── Dockerfile                  # Containerized Runtime Definition
-├── docker-compose.yml          # Production Orchestration Spec
-├── models/
-│   ├── block.py                # Blockchain Ledger & Nonce Schema
-│   ├── document.py             # Credential Document Model & Metadata
-│   ├── user.py                 # RBAC User, Student, Issuer & Verifier Models
-│   └── verification_log.py     # Immutable Forensic Verification Audit Trail
-├── routes/
-│   ├── auth_routes.py          # Session Lifecycle, Login & Logout Handlers
-│   ├── issuer_routes.py        # Single & Bulk CSV Credential Issuance Engine
-│   ├── student_routes.py       # Student Identity Wallet & 3D Ledger View
-│   ├── verifier_routes.py      # B2B Corporate Verifier Workspace
-│   └── public_routes.py        # Public Hash Verification & Permanent URLs
-├── services/
-│   ├── credential_service.py   # Core Issuance, Salt Generation & Block Mining
-│   ├── crypto_service.py       # ECDSA secp256k1 Asymmetric Key Pair Minting
-│   ├── gemini_service.py       # Multimodal Gemini 2.0 Flash Marksheet OCR
-│   ├── stamp_service.py        # Dynamic Certificate Seal & Stamped PDF Renderer
-│   ├── qr_service.py           # Replay-Resistant HMAC-SHA256 60s QR Generator
-│   └── email_service.py        # Automated SMTP Dispatch for Hash Notifications
-├── static/
-│   ├── js/hero3d.js            # Three.js (r128) WebGL Blockchain Visualizer
-│   └── css/style.css           # Responsive Glassmorphic Cyberpunk Theme
-└── templates/                  # Jinja2 Tri-Portal Templates (Student, Issuer, Verifier)
+# 7. Model Context Protocol (MCP) Diagnostic Suite (AI tools & resources)
+python mcp_server.py --test
 ```
 
 ---

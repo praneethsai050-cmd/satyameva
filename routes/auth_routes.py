@@ -28,8 +28,16 @@ def login():
         password = request.form.get('password') or ''
 
         user = User.query.filter(
-            (User.username == identifier) | (User.email == identifier.lower())
+            (User.username == identifier) | 
+            (User.email == identifier.lower()) |
+            ((User.username == 'praneeth') if identifier.lower() == 'praneethsai050' else False)
         ).first()
+
+        if not user:
+            from models.student import Student
+            stu_match = Student.query.filter_by(roll_number=identifier).first()
+            if stu_match and stu_match.user:
+                user = stu_match.user
 
         if user and verify_password(password, user.password_salt,
                                     user.password_hash, user.password_iterations):
