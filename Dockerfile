@@ -1,5 +1,5 @@
 # Satyameva - Blockchain Academic Credential Verification
-# Multi-stage production Dockerfile
+# Production Dockerfile optimized for Render & Cloud Platforms
 
 FROM python:3.12-slim AS base
 
@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system dependencies for cryptography / postgresql client
+# Install system dependencies for cryptography / image processing
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
@@ -23,13 +23,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source
 COPY . .
 
-# Ensure instance directory exists for storage
+# Ensure instance directory exists for SQLite / storage
 RUN mkdir -p /app/instance
 
+# Expose default port
 EXPOSE 5000
 
-# Health check against root or verify endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:5000/verify || exit 1
-
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "60", "run:app"]
+# Start with dynamic port binding for Render ($PORT) with fallback to 5000
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --threads 4 --timeout 120 run:app"]
