@@ -22,7 +22,7 @@ PUBLIC_ENDPOINTS = {
     'blockchain_api.register_nodes',
     'oauth.google_login', 'oauth.google_callback',
     'oauth.microsoft_login', 'oauth.microsoft_callback',
-    'service_worker', 'manifest',
+    'service_worker', 'manifest', 'health_check',
 }
 
 
@@ -74,6 +74,27 @@ def create_app(config_name: str | None = None, test_config: dict | None = None) 
     def manifest():
         from flask import send_from_directory
         return send_from_directory(os.path.join(BASE_DIR, 'static'), 'manifest.json', mimetype='application/manifest+json')
+
+    @app.route('/health')
+    def health_check():
+        from flask import jsonify
+        return jsonify({
+            'status': 'healthy',
+            'system': 'Satyameva Aegis',
+            'version': '2.4.0',
+            'mcp': 'ready'
+        }), 200
+
+    @app.after_request
+    def add_cors_headers(response):
+        from flask import request
+        origin = request.headers.get('Origin', '*')
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept'
+        return response
+
 
     return app
 

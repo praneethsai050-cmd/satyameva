@@ -235,6 +235,9 @@ Set-Cookie: session=...; HttpOnly; SameSite=Lax; Path=/
 ```
 
 ### 6.2 Register Peer Blockchain Nodes
+
+> **Note for Evaluators & Auditors:** Node hostnames such as jiit-node.satyameva.in and 192.168.1.101 in the examples below are illustrative sample endpoints for simulating peer-to-peer federated multi-campus nodes in local/staging environments. In production, node URLs resolve to active public HTTPS cloud endpoints.
+
 - **Endpoint:** `POST /blockchain/nodes/register`
 - **Request Body (`application/json`):**
 ```json

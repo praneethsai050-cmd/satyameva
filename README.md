@@ -274,6 +274,24 @@ Open your browser and navigate to: **`http://127.0.0.1:5000`**
 
 ---
 
+## ☁️ Live Cloud Deployment (Render / Railway / Fly.io)
+
+Satyameva Aegis is a full-stack production application (Python 3.12+ Flask backend with embedded Jinja2 UI, 3D WebGL holographic inspector, SQLite/PostgreSQL, Gemini AI 2.0 Flash multimodal OCR, and MCP JSON-RPC 2.0 runtime).
+
+### Instant Deploy to Render (Zero-Config):
+1. Navigate to [Render Dashboard](https://dashboard.render.com/) → **New Web Service** → Connect praneethsai050-cmd/satyameva.
+2. Render automatically detects [
+ender.yaml](file:///c:/Users/hp/OneDrive/Desktop/Satyameva/render.yaml) & [Procfile](file:///c:/Users/hp/OneDrive/Desktop/Satyameva/Procfile):
+   - **Build Command:** pip install -r requirements.txt
+   - **Start Command:** gunicorn --workers 2 --threads 4 --timeout 120 run:app
+   - **Health Check Path:** /health
+3. Add your environment variables in the Render Dashboard:
+   - GEMINI_API_KEY: *(Google AI Studio key for marksheet auto-extraction)*
+   - MAIL_USERNAME & MAIL_PASSWORD: *(Optional: Gmail SMTP credentials for automated verification alerts)*
+4. Click **Deploy Web Service** → Your live public HTTPS URL will be available immediately (e.g. https://satyameva-aegis.onrender.com).
+
+---
+
 ## 🐳 Docker Deployment
 
 Run the complete isolated production environment using Docker Compose:
