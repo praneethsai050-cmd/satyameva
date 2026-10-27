@@ -18,6 +18,8 @@ instance/
 
 # Secrets — NEVER commit these
 .env
+render.env
+*.env
 *.pem
 *.key
 
