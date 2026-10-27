@@ -22,7 +22,7 @@ PUBLIC_ENDPOINTS = {
     'blockchain_api.register_nodes',
     'oauth.google_login', 'oauth.google_callback',
     'oauth.microsoft_login', 'oauth.microsoft_callback',
-    'service_worker', 'manifest', 'health_check',
+    'service_worker', 'manifest', 'health_check', 'healthz_check',
 }
 
 
@@ -74,6 +74,10 @@ def create_app(config_name: str | None = None, test_config: dict | None = None) 
     def manifest():
         from flask import send_from_directory
         return send_from_directory(os.path.join(BASE_DIR, 'static'), 'manifest.json', mimetype='application/manifest+json')
+
+    @app.route('/healthz')
+    def healthz_check():
+        return health_check()
 
     @app.route('/health')
     def health_check():
