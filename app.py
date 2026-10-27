@@ -56,6 +56,10 @@ def create_app(config_name: str | None = None, test_config: dict | None = None) 
     _register_template_helpers(app)
     _register_error_handlers(app)
 
+    # Respect reverse-proxy headers (Render, Cloudflare, Nginx) for HTTPS URLs
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     @app.route('/')
     def index():
         if current_user.is_authenticated:
