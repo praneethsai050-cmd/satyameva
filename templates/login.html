@@ -129,6 +129,11 @@
         <span>Verifying someone else's certificate?</span>
         <a href="{{ url_for('public.verify') }}">Public verifier →</a>
       </div>
+
+      <div class="row row-between tiny faint" style="margin-top:0.5rem">
+        <span>Want to see the full system?</span>
+        <a href="{{ url_for('public.showcase') }}" style="color:var(--accent)">&#x1F52C; Live demo →</a>
+      </div>
     </div>
   </section>
 {% endblock %}
