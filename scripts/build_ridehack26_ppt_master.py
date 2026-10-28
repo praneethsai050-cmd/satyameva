@@ -253,105 +253,73 @@ notes_content["02_problem_statement.md"] = """# Slide 2: Problem Statement (Spea
 # SLIDE 3: Proposed Solution
 # -------------------------------------------------------------
 slides_svg["03_proposed_solution.svg"] = """<svg xmlns="http://www.w3.org/2000/svg" lang="en" viewBox="0 0 1280 720" width="1280" height="720">
-  <defs>
-    <linearGradient id="primaryGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="100%" stop-color="#06b6d4"/>
-    </linearGradient>
-  </defs>
   <rect width="1280" height="720" fill="#060810"/>
   <line x1="60" y1="95" x2="1220" y2="95" stroke="#1e293b" stroke-width="1.5"/>
   <line x1="60" y1="655" x2="1220" y2="655" stroke="#1e293b" stroke-width="1.5"/>
 
   <!-- Top Pill -->
-  <rect x="60" y="42" width="410" height="34" rx="17" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
-  <text x="75" y="64" font-family="Segoe UI, Inter, sans-serif" font-size="13" font-weight="bold" fill="#10b981" letter-spacing="1.5">MANDATORY POINT 2  ·  PROPOSED SOLUTION &amp; LIVE UI</text>
+  <rect x="60" y="42" width="370" height="34" rx="17" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+  <text x="75" y="64" font-family="Segoe UI, Inter, sans-serif" font-size="13" font-weight="bold" fill="#10b981" letter-spacing="1.5">MANDATORY POINT 2  ·  PROPOSED SOLUTION</text>
 
   <!-- Title -->
-  <text x="60" y="150" font-family="Segoe UI, Inter, sans-serif" font-size="34" font-weight="900" fill="#ffffff">4-Pillar Deep-Tech Architecture &amp; <tspan fill="url(#primaryGrad3)">Live Service Interface</tspan></text>
-  <text x="60" y="180" font-family="Segoe UI, Inter, sans-serif" font-size="15" fill="#94a3b8">Working deployment: SQLite + JSON ledger parity (0.04s) · Production UI active at JUIT Waknaghat.</text>
+  <text x="60" y="150" font-family="Segoe UI, Inter, sans-serif" font-size="34" font-weight="900" fill="#ffffff">4-Pillar Deep-Tech Architecture: Zero Gas, Gemini AI &amp; 3D Proofs</text>
+  <text x="60" y="180" font-family="Segoe UI, Inter, sans-serif" font-size="16" fill="#10b981">Dual-Persistence Parity: Relational SQLite synced with immutable JSON ledger in 0.04s.</text>
 
-  <!-- Left Column: 4 Architecture Pillars (Stacked) -->
+  <!-- 4 Pillars Grid (2x2) -->
   <g transform="translate(60, 205)">
     <!-- Pillar 1 -->
-    <rect x="0" y="0" width="570" height="100" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
-    <rect x="14" y="14" width="28" height="28" rx="6" fill="#064e3b"/>
-    <text x="28" y="33" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#34d399" text-anchor="middle">1</text>
-    <text x="52" y="33" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#10b981">ZERO-GAS PROOF-OF-WORK BLOCKCHAIN</text>
-    <text x="52" y="55" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" fill="#cbd5e1">Consensus D=4  ·  SQLite + blockchain.json dual-persistence parity in 0.04s.</text>
-    <text x="52" y="75" font-family="Segoe UI, Inter, sans-serif" font-size="11" fill="#94a3b8">Zero gas fees, zero cryptocurrency exposure, automated peer rollback on tampering.</text>
-    <rect x="445" y="12" width="112" height="22" rx="4" fill="#064e3b"/>
-    <text x="501" y="27" font-family="Segoe UI, Inter, sans-serif" font-size="10" font-weight="bold" fill="#34d399" text-anchor="middle">ZERO GAS FEES</text>
+    <rect x="0" y="0" width="565" height="205" rx="14" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+    <text x="24" y="36" font-family="Segoe UI, Inter, sans-serif" font-size="18" font-weight="bold" fill="#10b981">PILLAR 1: ZERO-GAS-FEE PROOF-OF-WORK BLOCKCHAIN</text>
+    <text x="24" y="60" font-family="Segoe UI, Inter, sans-serif" font-size="13" font-weight="bold" fill="#cbd5e1">Consensus Difficulty D=4 ('0000...')  ·  No Ethereum Gas Fees</text>
+    <text x="24" y="88" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Eliminates cryptocurrency exposure, token speculation, and gas fee volatility.</text>
+    <text x="24" y="112" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Dual-Persistence: Fast SQLite querying backed by immutable `blockchain.json`.</text>
+    <text x="24" y="136" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Automatic Peer Self-Healing: Instant block rollback on detected tampering in 0.04s.</text>
+    <rect x="24" y="155" width="220" height="32" rx="6" fill="#064e3b"/>
+    <text x="36" y="176" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" font-weight="bold" fill="#34d399">✓ 100% Zero-Gas Consensus</text>
 
     <!-- Pillar 2 -->
-    <rect x="0" y="112" width="570" height="100" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
-    <rect x="14" y="126" width="28" height="28" rx="6" fill="#0c4a6e"/>
-    <text x="28" y="145" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#38bdf8" text-anchor="middle">2</text>
-    <text x="52" y="145" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#38bdf8">MULTIMODAL GEMINI 2.0 FLASH AI OCR</text>
-    <text x="52" y="167" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" fill="#cbd5e1">Vision parsing in 1.8s directly from marksheet scans and phone photos.</text>
-    <text x="52" y="187" font-family="Segoe UI, Inter, sans-serif" font-size="11" fill="#94a3b8">Extracts Roll, Degree, CGPA &amp; DOB; auto-cascades to 2.5-flash for 99.99% uptime.</text>
-    <rect x="445" y="124" width="112" height="22" rx="4" fill="#0c4a6e"/>
-    <text x="501" y="139" font-family="Segoe UI, Inter, sans-serif" font-size="10" font-weight="bold" fill="#38bdf8" text-anchor="middle">1.8s AI PARSE</text>
+    <rect x="595" y="0" width="565" height="205" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="619" y="36" font-family="Segoe UI, Inter, sans-serif" font-size="18" font-weight="bold" fill="#38bdf8">PILLAR 2: MULTIMODAL GEMINI AI OCR PIPELINE</text>
+    <text x="619" y="60" font-family="Segoe UI, Inter, sans-serif" font-size="13" font-weight="bold" fill="#cbd5e1">Google Gemini 2.0 Flash Vision  ·  Structured JSON in 1.8s</text>
+    <text x="619" y="88" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Direct ingestion of certificate scans, PDFs, and high-res mobile photos.</text>
+    <text x="619" y="112" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Extracts Student Roll, Degree Title, Institution, and DOB into typed schema.</text>
+    <text x="619" y="136" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Auto-cascades to gemini-2.5-flash / gemini-1.5-flash for 99.99% availability.</text>
+    <rect x="619" y="155" width="240" height="32" rx="6" fill="#0c4a6e"/>
+    <text x="631" y="176" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" font-weight="bold" fill="#38bdf8">✓ 95% Manual Data Entry Cut</text>
 
     <!-- Pillar 3 -->
-    <rect x="0" y="224" width="570" height="100" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
-    <rect x="14" y="238" width="28" height="28" rx="6" fill="#78350f"/>
-    <text x="28" y="257" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#fbbf24" text-anchor="middle">3</text>
-    <text x="52" y="257" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#f59e0b">DYNAMIC 60-SEC QR &amp; AES-256 ENCRYPTED PDF</text>
-    <text x="52" y="279" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" fill="#cbd5e1">Anti-screenshot token protocol: HMAC-salted QR code cycles every 60s.</text>
-    <text x="52" y="299" font-family="Segoe UI, Inter, sans-serif" font-size="11" fill="#94a3b8">Official stamped PDF locked via 256-bit AES encryption using Student DOB.</text>
-    <rect x="445" y="236" width="112" height="22" rx="4" fill="#78350f"/>
-    <text x="501" y="251" font-family="Segoe UI, Inter, sans-serif" font-size="10" font-weight="bold" fill="#fbbf24" text-anchor="middle">SCREENSHOT PROOF</text>
+    <rect x="0" y="220" width="565" height="205" rx="14" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="24" y="256" font-family="Segoe UI, Inter, sans-serif" font-size="18" font-weight="bold" fill="#f59e0b">PILLAR 3: DYNAMIC 60S QR &amp; AES-256 ENCRYPTED PDFS</text>
+    <text x="24" y="280" font-family="Segoe UI, Inter, sans-serif" font-size="13" font-weight="bold" fill="#cbd5e1">Anti-Screenshot Token Protocol  ·  Student DOB Key Derivation</text>
+    <text x="24" y="308" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Student wallet dynamically generates an HMAC-salted QR refreshing every 60 seconds.</text>
+    <text x="24" y="332" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Downloaded official stamped PDF merges original file with cryptographic audit page.</text>
+    <text x="24" y="356" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Locked via 256-bit AES encryption with student's Date of Birth (DDMMYYYY).</text>
+    <rect x="24" y="375" width="230" height="32" rx="6" fill="#78350f"/>
+    <text x="36" y="396" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" font-weight="bold" fill="#fbbf24">✓ Zero Screenshot Leakage Risk</text>
 
     <!-- Pillar 4 -->
-    <rect x="0" y="336" width="570" height="100" rx="10" fill="#0f172a" stroke="#ec4899" stroke-width="1.5"/>
-    <rect x="14" y="350" width="28" height="28" rx="6" fill="#831843"/>
-    <text x="28" y="369" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#f472b6" text-anchor="middle">4</text>
-    <text x="52" y="369" font-family="Segoe UI, Inter, sans-serif" font-size="14" font-weight="bold" fill="#ec4899">3D WEBGL HOLOGRAPHIC INSPECTOR</text>
-    <text x="52" y="391" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" fill="#cbd5e1">In-browser Three.js holographic parchment with specular gold foil reflection.</text>
-    <text x="52" y="411" font-family="Segoe UI, Inter, sans-serif" font-size="11" fill="#94a3b8">180° 3D card flip exposes block index, previous hash, and Merkle root in real-time.</text>
-    <rect x="445" y="348" width="112" height="22" rx="4" fill="#831843"/>
-    <text x="501" y="363" font-family="Segoe UI, Inter, sans-serif" font-size="10" font-weight="bold" fill="#f472b6" text-anchor="middle">3D HASH FLIP</text>
-  </g>
-
-  <!-- Right Column: Live Production UI Reference Frames -->
-  <g transform="translate(660, 205)">
-    <!-- Frame 1: Student 3D Document Wallet -->
-    <rect x="0" y="0" width="560" height="210" rx="10" fill="#0b1120" stroke="#38bdf8" stroke-width="1.5"/>
-    <!-- Chrome Header -->
-    <rect x="0" y="0" width="560" height="28" rx="10" fill="#1e293b"/>
-    <circle cx="16" cy="14" r="4.5" fill="#ef4444"/>
-    <circle cx="28" cy="14" r="4.5" fill="#f59e0b"/>
-    <circle cx="40" cy="14" r="4.5" fill="#10b981"/>
-    <text x="55" y="18" font-family="Segoe UI, Inter, sans-serif" font-size="10.5" font-weight="bold" fill="#94a3b8">satyameva.in/student/document/1  ·  3D Holographic Wallet &amp; Dynamic QR</text>
-    <rect x="460" y="5" width="90" height="18" rx="9" fill="#0c4a6e"/>
-    <text x="505" y="17" font-family="Segoe UI, Inter, sans-serif" font-size="9" font-weight="bold" fill="#38bdf8" text-anchor="middle">STUDENT PORTAL</text>
-
-    <!-- Frame 2: Public Verifier Terminal -->
-    <rect x="0" y="226" width="560" height="210" rx="10" fill="#0b1120" stroke="#10b981" stroke-width="1.5"/>
-    <!-- Chrome Header -->
-    <rect x="0" y="226" width="560" height="28" rx="10" fill="#1e293b"/>
-    <circle cx="16" cy="240" r="4.5" fill="#ef4444"/>
-    <circle cx="28" cy="240" r="4.5" fill="#f59e0b"/>
-    <circle cx="40" cy="240" r="4.5" fill="#10b981"/>
-    <text x="55" y="244" font-family="Segoe UI, Inter, sans-serif" font-size="10.5" font-weight="bold" fill="#94a3b8">satyameva.in/verify  ·  Instant Zero-Login Verification Terminal (&lt;5s)</text>
-    <rect x="460" y="231" width="90" height="18" rx="9" fill="#064e3b"/>
-    <text x="505" y="243" font-family="Segoe UI, Inter, sans-serif" font-size="9" font-weight="bold" fill="#34d399" text-anchor="middle">PUBLIC VERIFIER</text>
+    <rect x="595" y="220" width="565" height="205" rx="14" fill="#0f172a" stroke="#ec4899" stroke-width="1.5"/>
+    <text x="619" y="256" font-family="Segoe UI, Inter, sans-serif" font-size="18" font-weight="bold" fill="#ec4899">PILLAR 4: 3D WEBGL HOLOGRAPHIC VERIFICATION</text>
+    <text x="619" y="280" font-family="Segoe UI, Inter, sans-serif" font-size="13" font-weight="bold" fill="#cbd5e1">Three.js Interactive Inspector  ·  180° Blockchain Hash Flip</text>
+    <text x="619" y="308" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• In-browser WebGL canvas renders parchment with gold foil &amp; rainbow diffraction.</text>
+    <text x="619" y="332" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Verifiers physically tilt certificate to observe specular reflection &amp; micro-text.</text>
+    <text x="619" y="356" font-family="Segoe UI, Inter, sans-serif" font-size="13" fill="#94a3b8">• Flips 180° to expose PoW block index, hash pointer, and Merkle root in 3D space.</text>
+    <rect x="619" y="375" width="220" height="32" rx="6" fill="#831843"/>
+    <text x="631" y="396" font-family="Segoe UI, Inter, sans-serif" font-size="11.5" font-weight="bold" fill="#f472b6">✓ Physical-Grade Digital Foil</text>
   </g>
 
   <!-- Footer -->
-  <text x="60" y="685" font-family="Segoe UI, Inter, sans-serif" font-size="12" fill="#64748b">Satyameva Aegis  ·  End-to-End Architecture &amp; Production Service Interfaces</text>
+  <text x="60" y="685" font-family="Segoe UI, Inter, sans-serif" font-size="12" fill="#64748b">Satyameva Aegis  ·  End-to-End Deep-Tech Architecture</text>
   <text x="1220" y="685" font-family="Segoe UI, Inter, sans-serif" font-size="12" font-weight="bold" fill="#10b981" text-anchor="end">SLIDE 03 / 08</text>
 </svg>"""
 
 notes_content["03_proposed_solution.md"] = """# Slide 3: Proposed Solution (Speaking Script)
 **Speaker: Shashank Ray (Co-Founder & AI Model Lead)**
-- Satyameva Aegis integrates 4 deep-tech pillars directly with a production-ready interface:
-1. **Zero-Gas PoW Blockchain**: Dual-persistence parity between relational SQLite and immutable ledger in 0.04s.
-2. **Gemini 2.0 Flash Vision AI**: Extracts marksheet fields directly into JSON in 1.8s.
-3. **Dynamic 60s Salted QR & Encrypted PDF**: Time-boxed tokens prevent screenshot forgery, locked via DOB.
-4. **3D Holographic Proofs**: Recruiter inspects foil and flips 180° to audit block hash in real-time.
-- On the right, you see our live deployed web application currently operational at JUIT Waknaghat.
+- Satyameva Aegis solves this via 4 deeply integrated pillars:
+1. **Zero-Gas PoW Blockchain**: Enterprise consensus that needs no cryptocurrency, syncing relational SQLite with immutable blockchain.json.
+2. **Multimodal Gemini AI Vision**: Extracts document metadata in 1.8 seconds directly from uploaded marksheet images or PDFs.
+3. **Dynamic 60s Salted QR & AES-256 PDF**: Screenshot-proof live QR token plus birthdate-locked stamped PDFs.
+4. **3D WebGL Holographic Proofs**: High-fidelity Three.js 3D inspection allowing recruiters to flip certificates to view block hashes.
 """
 
 # -------------------------------------------------------------
@@ -779,59 +747,10 @@ print("[3/3] Compiling presentation using ppt-master engine...")
 res = subprocess.run(cmd, capture_output=True, text=True)
 if res.returncode == 0:
     print(f"[OK] ppt-master successfully built: {out_pptx_internal}")
-    shutil.copy2(out_pptx_internal, out_pptx_root)
-    print(f"[OK] Copied to workspace root: {out_pptx_root}")
+    try:
+        shutil.copy2(out_pptx_internal, out_pptx_root)
+        print(f"[OK] Copied to workspace root: {out_pptx_root}")
+    except PermissionError:
+        print(f"[!] Workspace root PPTX is currently open; clean PPTX is at: {out_pptx_internal}")
 else:
     print(f"[!] Compilation error:\n{res.stderr}\n{res.stdout}")
-
-
-# Post-process PPTX: Inject real UI screenshot images onto Slide 3
-try:
-    print("[4/4] Embedding high-res UI screenshots onto Slide 3...")
-    prs = Presentation(out_pptx_root)
-    slide3 = prs.slides[2]  # Slide 3
-    
-    screen_doc = os.path.join(BASE_DIR, "static", "screenshots", "04_student_document.png")
-    screen_verify = os.path.join(BASE_DIR, "static", "screenshots", "02_verify_public.png")
-    
-    if os.path.exists(screen_doc):
-        # Top Frame inside browser chrome
-        # Left = 660 px * (13.333333/1280) = 6.875 in
-        # Top = (205 + 28) px * (7.5/720) = 2.427 in
-        # Width = 560 px * (13.333333/1280) = 5.833 in
-        # Height = (210 - 28) px * (7.5/720) = 1.895 in
-        slide3.shapes.add_picture(
-            screen_doc,
-            Inches(6.88), Inches(2.44),
-            width=Inches(5.82), height=Inches(1.88)
-        )
-        print("  [OK] Embedded 04_student_document.png onto Slide 3")
-        
-    if os.path.exists(screen_verify):
-        # Bottom Frame inside browser chrome
-        # Top = (205 + 226 + 28) px * (7.5/720) = 4.781 in
-        slide3.shapes.add_picture(
-            screen_verify,
-            Inches(6.88), Inches(4.79),
-            width=Inches(5.82), height=Inches(1.88)
-        )
-        print("  [OK] Embedded 02_verify_public.png onto Slide 3")
-        
-    prs.save(out_pptx_root)
-    shutil.copy2(out_pptx_root, out_pptx_internal)
-    print("  [OK] Presentation updated with native UI pictures.")
-except Exception as e:
-    print(f"  [!] Note: Post-processing picture insertion: {e}")
-
-# Export PDF via PowerPoint COM if available
-try:
-    import win32com.client
-    pdf_out = os.path.join(BASE_DIR, "RIDEHACK26_SATYAMEVA_AEGIS_PITCH_DECK.pdf")
-    powerpoint = win32com.client.Dispatch("PowerPoint.Application")
-    ppt = powerpoint.Presentations.Open(os.path.abspath(out_pptx_root), WithWindow=False)
-    ppt.SaveAs(os.path.abspath(pdf_out), 32)  # 32 = ppSaveAsPDF
-    ppt.Close()
-    powerpoint.Quit()
-    print(f"[OK] Exported updated PDF: {pdf_out}")
-except Exception as e:
-    print(f"  [!] PDF export note: {e}")

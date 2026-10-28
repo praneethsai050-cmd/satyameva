@@ -5,9 +5,7 @@ Deliberately open — no login. A QR code on a printed transcript has to work
 for an HR assistant who has never heard of this system, which is the entire
 point of the "under 5 seconds" claim. Every hit is still logged.
 """
-import os
-
-from flask import Blueprint, redirect, render_template, request, url_for, current_app
+from flask import Blueprint, redirect, render_template, request, url_for
 
 from security import truncate_hash, visual_hash_swatches
 # Aliased: the view function below is also called `verify_hash` because its
@@ -66,18 +64,4 @@ def verify_hash_outcome(doc_hash: str, token: str | None, method: str = 'HASH'):
 def offline():
     """PWA offline fallback shell."""
     return render_template('offline.html')
-
-
-@public_bp.route('/demo')
-def showcase():
-    """
-    Public live-demo / service showcase page.
-
-    Lists all screenshots from static/screenshots/ if they exist,
-    so the template can conditionally show real screenshots vs. mock
-    placeholders.
-    """
-    screenshots_dir = os.path.join(current_app.static_folder, 'screenshots')
-    screenshots_exist = os.path.isdir(screenshots_dir) and bool(os.listdir(screenshots_dir))
-    return render_template('public/showcase.html', screenshots_exist=screenshots_exist)
 
