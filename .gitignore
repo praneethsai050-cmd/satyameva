@@ -39,3 +39,6 @@ Thumbs.db
 *.odp
 *.docx
 *.doc
+
+# External tools
+ppt-master/
