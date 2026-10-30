@@ -163,7 +163,7 @@ def setup_portals(reset: bool = True):
         # 2. University Issuer (JUIT Waknaghat Registrar)
         issuer_user = create_user(
             username='juit.registrar',
-            email='registrar@juit.ac.in',
+            email='juit.registrar@satyameva.local',
             role=ROLE_ISSUER,
             password='Juit@2026',
             organization='Jaypee University of Information Technology',
@@ -352,7 +352,7 @@ def setup_portals(reset: bool = True):
         print("2. University Issuer Portal (/issuer/):")
         print("   Username: juit.registrar")
         print("   Password: Juit@2026")
-        print("   Email:    registrar@juit.ac.in")
+        print("   Email:    juit.registrar@satyameva.local")
         print("   Campus:   Jaypee University of Information Technology (JUIT)\n")
 
         print("3. Student Portal & Wallet (/student/dashboard):")
